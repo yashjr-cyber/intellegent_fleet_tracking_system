@@ -1,8 +1,9 @@
 export type Identifier = string;
 
 export type UserRole = "student" | "driver" | "admin";
-export type RecordStatus = "active" | "inactive" | "maintenance";
-export type TripStatus = "scheduled" | "boarding" | "in_progress" | "completed";
+export type RecordStatus = "active" | "inactive" | "idle" | "maintenance";
+export type TripStatus = "scheduled" | "boarding" | "in_progress" | "paused" | "completed";
+export type TripDirection = "outbound" | "homebound";
 
 export interface Route {
   id: Identifier;
@@ -19,6 +20,8 @@ export interface Trip {
   scheduledStart: string;
   scheduledEnd: string;
   status: TripStatus;
+  direction?: TripDirection;
+  scheduledDate?: string;
 }
 
 export interface Bus {
@@ -77,11 +80,16 @@ export interface AttendanceEvent {
   stopId: Identifier;
   eventType: "boarded" | "alighted";
   occurredAt: string;
+  readerId?: Identifier;
+  source?: "simulated" | "device";
+  eventStatus?: "recorded" | "unmatched" | "duplicate" | "failed";
 }
 
 export interface GpsTelemetry {
   id: Identifier;
   trackerId: Identifier;
+  tripId?: Identifier;
+  busId?: Identifier;
   latitude: number;
   longitude: number;
   speedKph: number;
@@ -94,6 +102,21 @@ export interface LoRaNode {
   stopId: Identifier;
   status: RecordStatus;
   lastSeenAt: string;
+  parentNodeId?: Identifier | null;
+  gatewayId?: Identifier;
+  batteryPercent?: number;
+  rssiDbm?: number;
+  snrDb?: number;
+  deviceId?: string;
+  readerId?: Identifier;
+}
+
+export interface LoRaGateway {
+  id: Identifier;
+  name: string;
+  status: RecordStatus;
+  lastSeenAt: string;
+  backendConnected: boolean;
 }
 
 export interface Notification {
@@ -126,6 +149,79 @@ export interface FleetSnapshot {
   attendanceEvents: AttendanceEvent[];
   gpsTelemetry: GpsTelemetry[];
   loraNodes: LoRaNode[];
+  loraGateways: LoRaGateway[];
   notifications: Notification[];
   tripAssignments: TripAssignment[];
+  ingestionAudit: IngestionAuditEvent[];
+  driverIncidents: DriverIncident[];
+  tripLifecycleEvents: TripLifecycleEvent[];
+}
+
+export type EventSourceKind = "device" | "gateway" | "simulator" | "backend";
+
+export interface IntegrationEvent<TPayload> {
+  eventId: Identifier;
+  eventType: string;
+  schemaVersion: 1;
+  timestamp: string;
+  source: {
+    kind: EventSourceKind;
+    deviceId: string;
+    adapter: string;
+  };
+  idempotencyKey?: string;
+  payload: TPayload;
+}
+
+export interface GpsTelemetryPayload {
+  tripId: Identifier;
+  trackerId: Identifier;
+  busId: Identifier;
+  latitude: number;
+  longitude: number;
+  speedKph?: number;
+}
+
+export interface RfidTapPayload {
+  cardNumber: string;
+  readerId: Identifier;
+  tripId: Identifier;
+  stopId: Identifier;
+  eventType: AttendanceEvent["eventType"];
+}
+
+export interface LoRaHealthPayload {
+  nodeId: Identifier;
+  gatewayId: Identifier;
+  status: RecordStatus;
+  batteryPercent?: number;
+  rssiDbm?: number;
+  snrDb?: number;
+}
+
+export interface IngestionAuditEvent {
+  id: Identifier;
+  eventType: string;
+  timestamp: string;
+  sourceDeviceId: string;
+  status: "accepted" | "rejected" | "duplicate";
+  message: string;
+  idempotencyKey?: string;
+}
+
+export interface DriverIncident {
+  id: Identifier;
+  tripId: Identifier;
+  driverId: Identifier;
+  category: "safety" | "vehicle" | "route" | "other";
+  note: string;
+  reportedAt: string;
+}
+
+export interface TripLifecycleEvent {
+  id: Identifier;
+  tripId: Identifier;
+  type: "started" | "paused" | "resumed" | "ended" | "incident_reported";
+  occurredAt: string;
+  note?: string;
 }
