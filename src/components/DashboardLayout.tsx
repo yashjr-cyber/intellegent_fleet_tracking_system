@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { Brand } from "./Brand";
 import { Icon } from "./Icons";
@@ -12,22 +12,27 @@ const roleInfo: Record<UserRole, { label: string; displayName: string; initials:
   admin: { label: "CAMPUS ADMIN", displayName: "Avery Chen", initials: "AC" },
 };
 
-const navItems: Record<UserRole, { id: string; label: string; icon: "grid" | "map" | "users" | "bus" | "clock" }[]> = {
+const navItems: Record<UserRole, { id: string; label: string; icon: "grid" | "map" | "users" | "bus" | "clock"; href?: string }[]> = {
   student: [
-    { id: "overview", label: "Overview", icon: "grid" },
-    { id: "my-journey", label: "My journey", icon: "map" },
-    { id: "ride-history", label: "Ride history", icon: "clock" },
+    { id: "overview", label: "Overview", icon: "grid", href: "/student" },
+    { id: "my-journey", label: "My journey", icon: "map", href: "/student?section=my-journey" },
+    { id: "attendance", label: "My attendance", icon: "clock", href: "/student/attendance" },
   ],
   driver: [
-    { id: "overview", label: "Overview", icon: "grid" },
-    { id: "today", label: "Today's trips", icon: "map" },
-    { id: "vehicle", label: "My vehicle", icon: "bus" },
+    { id: "overview", label: "Overview", icon: "grid", href: "/driver" },
+    { id: "today", label: "Today's trips", icon: "map", href: "/driver/trips" },
+    { id: "vehicle", label: "My vehicle", icon: "bus", href: "/driver/vehicle" },
   ],
   admin: [
-    { id: "overview", label: "Overview", icon: "grid" },
-    { id: "fleet", label: "Fleet map", icon: "map" },
-    { id: "people", label: "People", icon: "users" },
-    { id: "attendance", label: "Attendance", icon: "clock" },
+    { id: "overview", label: "Overview", icon: "grid", href: "/admin" },
+    { id: "fleet", label: "Fleet map", icon: "map", href: "/admin/fleet" },
+    { id: "vehicles", label: "Buses & trackers", icon: "bus", href: "/admin/buses" },
+    { id: "routes", label: "Routes & stops", icon: "map", href: "/admin/routes" },
+    { id: "trips", label: "Trips & assignments", icon: "clock", href: "/admin/trips" },
+    { id: "people", label: "Drivers", icon: "users", href: "/admin/drivers" },
+    { id: "attendance", label: "Attendance", icon: "clock", href: "/admin/attendance" },
+    { id: "analytics", label: "Analytics", icon: "grid", href: "/admin/analytics" },
+    { id: "lora", label: "LoRa network", icon: "map", href: "/admin/lora" },
   ],
 };
 
@@ -42,11 +47,24 @@ export function DashboardLayout({
   subtitle: string;
   children: ReactNode;
 }) {
-  const [activeSection, setActiveSection] = useState("overview");
+  const [selectedSection, setSelectedSection] = useState("overview");
   const [menuOpen, setMenuOpen] = useState(false);
   const { signOut } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const info = roleInfo[role];
+  const requestedSection = new URLSearchParams(location.search).get("section");
+  const routeSection = navItems[role].find((item) => item.href === location.pathname)?.id;
+  const activeSection = role === "student" && requestedSection === "my-journey"
+    ? "my-journey"
+    : routeSection ?? selectedSection;
+
+  useEffect(() => {
+    if (role !== "student" || location.pathname !== "/student" || activeSection !== "my-journey") {
+      return;
+    }
+    document.getElementById("student-live-map")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeSection, location.pathname, role]);
 
   function leaveDemo() {
     signOut();
@@ -70,16 +88,9 @@ export function DashboardLayout({
               key={item.id}
               className={`nav-item${activeSection === item.id ? " nav-item--active" : ""}`}
               onClick={() => {
-                setActiveSection(item.id);
                 setMenuOpen(false);
-                const targetId = item.id === "overview"
-                  ? "dashboard-overview"
-                  : role === "student"
-                    ? item.id === "my-journey" ? "mobility-map" : "campus-schedule"
-                    : role === "driver"
-                      ? item.id === "today" ? "campus-schedule" : "mobility-map"
-                      : item.id === "fleet" ? "mobility-map" : item.id === "people" ? "route-community" : "campus-activity";
-                document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setSelectedSection(item.id);
+                if (item.href) navigate(item.href);
               }}
             >
               <Icon name={item.icon} size={18} />
@@ -122,13 +133,31 @@ export function DashboardLayout({
         <div className="dashboard-content" id="dashboard-overview">
           <div className="page-heading">
             <div>
-              <p className="eyebrow">{activeSection === "overview" ? "TUESDAY, OCTOBER 6" : info.label}</p>
+              <p className="eyebrow">{activeSection === "overview" ? new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date()).toUpperCase() : info.label}</p>
               <h1>{activeSection === "overview" ? title : navItems[role].find((item) => item.id === activeSection)?.label}</h1>
-              <p>{activeSection === "overview" ? subtitle : "A helpful snapshot of your campus mobility experience."}</p>
+              <p>
+                {activeSection === "overview"
+                  ? subtitle
+                  : activeSection === "attendance"
+                    ? "A read-only record of your RFID check-ins for campus rides."
+                    : "Your campus journey, in view from pickup through arrival."}
+              </p>
             </div>
             <div className="page-heading__actions">
               <button className="soft-button"><Icon name="clock" size={16} /> Today <Icon name="chevron" size={14} /></button>
-              <button className="primary-button" onClick={() => setActiveSection("overview")}><Icon name="grid" size={16} /> Overview</button>
+              <button
+                className="primary-button"
+                onClick={() => {
+                  setSelectedSection("overview");
+                  if (role === "student") {
+                    navigate("/student");
+                    return;
+                  }
+                  document.getElementById("dashboard-overview")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                <Icon name="grid" size={16} /> Overview
+              </button>
             </div>
           </div>
           {children}
