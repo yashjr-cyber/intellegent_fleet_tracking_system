@@ -6,9 +6,9 @@ import {
   Marker,
   Polyline,
   Popup,
-  TileLayer,
   useMap,
 } from "react-leaflet";
+import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
 import type { ArrivalPrediction } from "../services/ArrivalPredictionService";
 import type { SimulatedBusPosition } from "../services/simulatedTrackingService";
 import type { Route, Stop, Trip } from "../types/models";
@@ -75,6 +75,22 @@ function MapSizeObserver() {
   return null;
 }
 
+function VectorTileLayer() {
+  const map = useMap();
+
+  useEffect(() => {
+    const layer = maplibreGL({
+      style: "https://tiles.openfreemap.org/styles/liberty",
+    }).addTo(map);
+
+    return () => {
+      layer.remove();
+    };
+  }, [map]);
+
+  return null;
+}
+
 function RouteBoundsFitter({ bounds }: { bounds: L.LatLngBounds }) {
   const map = useMap();
 
@@ -134,10 +150,7 @@ export function CampusMap({
     >
       <MapSizeObserver />
       <RouteBoundsFitter bounds={mapBounds} />
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <VectorTileLayer />
       {routes.map((route) => {
         const routeStops = route.stopIds.flatMap((stopId) => {
           const stop = stopsById.get(stopId);
