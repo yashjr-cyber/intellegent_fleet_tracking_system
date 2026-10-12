@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import L from "leaflet";
 import {
   CircleMarker,
@@ -75,6 +75,23 @@ function MapSizeObserver() {
   return null;
 }
 
+function RouteBoundsFitter({ bounds }: { bounds: L.LatLngBounds }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const padding = L.point(24, 24);
+      const fittedZoom = map.getBoundsZoom(bounds, false, padding);
+      map.setMinZoom(Math.max(8, fittedZoom));
+      map.setMaxBounds(bounds);
+      map.fitBounds(bounds, { padding, maxZoom: fittedZoom });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [bounds, map]);
+
+  return null;
+}
+
 export function CampusMap({
   routes,
   positions,
@@ -93,18 +110,30 @@ export function CampusMap({
   onSelectBus: (busId: string) => void;
 }) {
   const stopsById = new Map(stops.map((stop) => [stop.id, stop]));
-  const campusCenter: L.LatLngExpression = [12.9722, 77.601];
+  const campusCenter: L.LatLngTuple = [12.9730868, 80.2430635];
+  const mapBounds = useMemo(() => {
+    const stopBounds = stops.filter((stop) =>
+      Number.isFinite(stop.latitude) && Number.isFinite(stop.longitude),
+    );
+    return stopBounds.length > 0
+      ? L.latLngBounds(stopBounds.map((stop) => [stop.latitude, stop.longitude] as L.LatLngTuple)).pad(0.08)
+      : L.latLngBounds([campusCenter, campusCenter]).pad(0.08);
+  }, [stops]);
 
   return (
     <MapContainer
       center={campusCenter}
-      zoom={15}
+      zoom={10}
+      minZoom={8}
+      maxBounds={mapBounds}
+      maxBoundsViscosity={1}
       scrollWheelZoom={false}
       zoomControl
       className="student-map__leaflet"
-      aria-label="Simulated Northstar campus bus map"
+      aria-label="Simulated Rajalakshmi Engineering College South Campus bus map"
     >
       <MapSizeObserver />
+      <RouteBoundsFitter bounds={mapBounds} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -114,15 +143,17 @@ export function CampusMap({
           const stop = stopsById.get(stopId);
           return stop ? [[stop.latitude, stop.longitude] as [number, number]] : [];
         });
+        const routeIndex = Math.max(0, routes.findIndex((item) => item.id === route.id));
+        const routeColor = ["#6a1b9a", "#b58a23", "#7a4aa0", "#9a6a14", "#503079", "#c19b3a"][routeIndex % 6];
         return (
           <Polyline
             key={route.id}
             positions={routeStops}
             pathOptions={{
-              color: route.id === "route-north" ? "#5bd8b4" : "#8a9be9",
+              color: routeColor,
               weight: 4,
               opacity: 0.8,
-              dashArray: route.id === "route-north" ? undefined : "7 7",
+              dashArray: routeIndex === 0 ? undefined : "7 7",
             }}
           />
         );

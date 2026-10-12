@@ -1,6 +1,10 @@
-# Wayfinder Mobility
+# REC South Campus Mobility
 
 **Dynamic Institutional Mobility Intelligence** is a responsive, role-separated campus mobility MVP built with React, TypeScript, and Vite. Its student, driver, and campus-team workflows use explicitly fictional demo data.
+
+The demo's campus endpoint is at **RMZ Millenia Business Park, Perungudi, Chennai** (approximately 12.9731, 80.2431), representing the new South Chennai campus branch. It is not the Rajalakshmi main campus in Thandalam. The map's zoom-out limit and bounds are sized to the full extent of the six supplied route corridors.
+
+The six route stop names and morning times are entered from the supplied timetable screenshots. The return timetable starts at the campus at 4:00 PM, reverses each route's stop order, and reuses the corresponding gap between adjacent morning stops. Coordinates for listed stops are illustrative map placements and should be checked against the institution's actual pickup points before operational use.
 
 ## Run locally
 
@@ -29,7 +33,7 @@ The first deployment requires GitHub Pages to be enabled with **Build and deploy
 - `src/services/FleetService.ts` is the async service contract; `demoFleetService.ts` provides isolated fictional sample data and mock integration boundaries.
 - `src/auth/AuthContext.tsx` and `src/App.tsx` provide demo role selection and separate `/student`, `/driver`, and `/admin` shells.
 - `src/components/` contains shared branding, icons, and responsive dashboard navigation.
-- Student pages provide a simulated campus map, replaceable ETA service, notification preferences and a read-only RFID attendance view.
+- Student pages provide the six REC route lists with stop selection, morning stop times and computed 4:00 PM return times, a simulated campus map, replaceable ETA service, notification preferences and a read-only RFID attendance view.
 - Driver pages expose assignment-driven trip lifecycle controls and incident reporting. Admin routes cover fleet, routes, trips, drivers, attendance, summary analytics and simulated LoRa topology.
 - `DemoFleetService` persists this fictional snapshot in browser local storage and publishes same-tab/cross-tab refresh events so role demos share changes. Reset the browser's `wayfinder.demo-fleet.v1` local-storage key to restore its initial snapshot.
 
@@ -58,7 +62,7 @@ Example GPS telemetry envelope:
     "trackerId": "tracker-17",
     "busId": "bus-aurora",
     "latitude": 12.972,
-    "longitude": 77.596,
+    "longitude": 80.3,
     "speedKph": 18
   }
 }
@@ -78,7 +82,7 @@ RFID tap payload:
     "cardNumber": "DEMO-RFID-018",
     "readerId": "reader-library",
     "tripId": "trip-morning-01",
-    "stopId": "stop-library",
+    "stopId": "stop-r1-thiruvottiyur",
     "eventType": "boarded"
   }
 }
@@ -93,10 +97,10 @@ LoRa node health payload:
   "schemaVersion": 1,
   "timestamp": "2026-10-06T08:30:00Z",
   "source": { "kind": "device", "deviceId": "demo-reader-library", "adapter": "lora-gateway-adapter" },
-  "idempotencyKey": "gateway-northstar:sequence-42",
+  "idempotencyKey": "gateway-rec-south:sequence-42",
   "payload": {
     "nodeId": "lora-reader-library",
-    "gatewayId": "gateway-northstar",
+    "gatewayId": "gateway-rec-south",
     "status": "active",
     "batteryPercent": 87,
     "rssiDbm": -61,

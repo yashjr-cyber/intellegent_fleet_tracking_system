@@ -21,20 +21,30 @@ import {
 import { getTrackingStatus } from "../services/trackingStatus";
 import { demoFleetService } from "../services/demoFleetService";
 import type { FleetSnapshot, Route, Stop, Trip } from "../types/models";
+import {
+  campusRouteTimetables,
+  formatRouteTime,
+  getReturnTimetable,
+} from "../data/campusRoutes";
 
 const defaultAlertSettings: EveningAlertSettings = {
   enabled: false,
   tripId: "trip-homebound-01",
-  pickupStopId: "stop-library",
-  dropStopId: "stop-residences",
+  pickupStopId: "stop-campus",
+  dropStopId: "stop-r1-thiruvottiyur",
   leadMinutes: 10,
 };
 
 const leadTimeOptions: EveningAlertSettings["leadMinutes"][] = [5, 10, 15, 20];
-const historicalMinutesPerStop: Readonly<Record<string, readonly number[]>> = {
-  "route-north": [6, 8, 7, 9, 7, 8],
-  "route-garden": [8, 9, 7, 10, 8, 9],
-};
+const historicalMinutesPerStop: Readonly<Record<string, readonly number[]>> =
+  Object.fromEntries(campusRouteTimetables.map((route) => [
+    route.id,
+    route.stops.slice(1).map((stop, index) => {
+      const [hours, minutes] = stop.time.split(":").map(Number);
+      const [previousHours, previousMinutes] = route.stops[index].time.split(":").map(Number);
+      return hours * 60 + minutes - (previousHours * 60 + previousMinutes);
+    }),
+  ]));
 const settingsStorageKey = "wayfinder-evening-arrival-settings";
 
 function readAlertSettings(): { settings: EveningAlertSettings; error: string | null } {
@@ -87,11 +97,15 @@ function getArrivalPrediction(
   route: Route,
   stops: readonly Stop[],
   now: Date,
+  direction: Trip["direction"] = "outbound",
 ): ArrivalPrediction {
-  const routeStops = route.stopIds.flatMap((stopId) => {
+  const outboundStops = route.stopIds.flatMap((stopId) => {
     const stop = stops.find((item) => item.id === stopId);
     return stop ? [stop] : [];
   });
+  const routeStops = direction === "homebound"
+    ? [...outboundStops].reverse()
+    : outboundStops;
   return demoArrivalPredictionService.predict({
     latitude: position.latitude,
     longitude: position.longitude,
@@ -127,6 +141,8 @@ export function StudentDashboardPage() {
   const [settingsError, setSettingsError] = useState<string | null>(storedSettings.error);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
+  const [selectedRouteId, setSelectedRouteId] = useState("route-north");
+  const [selectedPickupStopId, setSelectedPickupStopId] = useState("stop-r1-thiruvottiyur");
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
     typeof Notification === "undefined" ? "unsupported" : Notification.permission,
   );
@@ -194,7 +210,16 @@ export function StudentDashboardPage() {
   }, [settings]);
 
   const student = snapshot?.students.find((item) => item.id === "student-anaya");
-  const studentTrip = snapshot?.trips.find((item) => item.id === "trip-next-01");
+  const studentRoute = snapshot?.routes.find((item) => item.id === selectedRouteId);
+  const studentRouteStops = studentRoute?.stopIds.flatMap((stopId) => {
+    const stop = snapshot?.stops.find((item) => item.id === stopId);
+    return stop ? [stop] : [];
+  }) ?? [];
+  const selectedPickupStop = studentRouteStops.find((stop) => stop.id === selectedPickupStopId)
+    ?? studentRouteStops[0];
+  const studentTrip = snapshot?.trips
+    .filter((trip) => trip.routeId === studentRoute?.id && trip.direction === "outbound" && trip.status !== "completed")
+    .sort((left, right) => Number(right.status === "in_progress") - Number(left.status === "in_progress"))[0];
   const studentAssignment = snapshot?.tripAssignments.find(
     (item) => item.tripId === studentTrip?.id,
   );
@@ -211,16 +236,13 @@ export function StudentDashboardPage() {
   const studentPosition = positions.find(
     (position) => position.tripId === (activeTripOnAssignedBus?.id ?? studentTrip?.id),
   );
-  const studentRoute = snapshot?.routes.find(
-    (item) => item.id === studentTrip?.routeId,
-  );
-  const assignedStop = snapshot?.stops.find(
-    (item) => item.id === student?.stopId,
-  );
+  const assignedStop = selectedPickupStop;
 
   const homeboundTrips = useMemo(
-    () => snapshot?.trips.filter((trip) => trip.direction === "homebound") ?? [],
-    [snapshot],
+    () => snapshot?.trips.filter((trip) =>
+      trip.direction === "homebound" && trip.routeId === selectedRouteId,
+    ) ?? [],
+    [selectedRouteId, snapshot],
   );
   const alertTrip =
     homeboundTrips.find((trip) => trip.id === settings.tripId) ??
@@ -231,31 +253,47 @@ export function StudentDashboardPage() {
   const alertRoute = snapshot?.routes.find(
     (item) => item.id === alertTrip?.routeId,
   );
-  const alertPickup = snapshot?.stops.find(
-    (item) => item.id === settings.pickupStopId,
-  );
+  const alertRouteTimetable = campusRouteTimetables.find((route) => route.id === alertRoute?.id);
+  const alertReturnSchedule = alertRouteTimetable
+    ? getReturnTimetable(alertRouteTimetable)
+    : (alertRoute?.stopIds ?? []).slice().reverse().map((stopId, index) => ({
+        stop: { id: stopId },
+        time: index === 0 ? "16:00" : "",
+      }));
+  const homeboundRouteStops = alertReturnSchedule.flatMap(({ stop }) => {
+    const routeStop = snapshot?.stops.find((item) => item.id === stop.id);
+    return routeStop ? [routeStop] : [];
+  });
+  const alertPickup = homeboundRouteStops.find((item) => item.id === settings.pickupStopId)
+    ?? homeboundRouteStops[0];
+  const alertDropStop = homeboundRouteStops.find((item) => item.id === settings.dropStopId)
+    ?? homeboundRouteStops[1];
+  const homeboundTimeByStop = new Map(alertReturnSchedule.map(({ stop, time }) => [stop.id, time]));
+  const selectedRouteTimetable = campusRouteTimetables.find((route) => route.id === studentRoute?.id);
   const alertPosition = positions.find(
     (position) => position.tripId === alertTrip?.id,
   );
   const alertPrediction =
-    alertPosition?.status === "LIVE" && alertPickup && alertRoute && snapshot
+    alertPosition?.status === "LIVE" && alertDropStop && alertRoute && snapshot
       ? getArrivalPrediction(
           alertPosition,
-          alertPickup,
+          alertDropStop,
           alertRoute,
           snapshot.stops,
           now,
+          "homebound",
         )
       : null;
 
   const mapPositions = useMemo(() => {
     const uniqueBusIds = new Set<string>();
     return positions.filter((position) => {
+        if (position.routeId !== selectedRouteId) return false;
         if (uniqueBusIds.has(position.busId)) return false;
         uniqueBusIds.add(position.busId);
         return true;
     });
-  }, [positions]);
+  }, [positions, selectedRouteId]);
 
   const selectedPosition = positions.find(
     (position) => position.busId === selectedBusId,
@@ -270,13 +308,14 @@ export function StudentDashboardPage() {
     (bus) => bus.id === selectedPosition?.busId,
   );
   const selectedPrediction =
-    selectedPosition?.status === "LIVE" && selectedRoute && snapshot
+    selectedPosition?.status === "LIVE" && selectedRoute && selectedTrip && snapshot
       ? getArrivalPrediction(
           selectedPosition,
           selectedPosition.nextStop,
           selectedRoute,
           snapshot.stops,
           now,
+          selectedTrip.direction,
         )
       : null;
   const mapDetailsByBusId = useMemo(() => {
@@ -309,6 +348,7 @@ export function StudentDashboardPage() {
               route,
               snapshot.stops,
               now,
+              trip.direction,
             )
           : null,
       });
@@ -317,15 +357,15 @@ export function StudentDashboardPage() {
   }, [mapPositions, now, snapshot]);
 
   useEffect(() => {
-    const configurationKey = alertTrip && alertPickup
-      ? `${alertTrip.id}:${alertPickup.id}:${settings.leadMinutes}`
+    const configurationKey = alertTrip && alertDropStop
+      ? `${alertTrip.id}:${alertDropStop.id}:${settings.leadMinutes}`
       : null;
     const configurationChanged =
       configurationKey !== null &&
       configurationKey !== lastAlertConfigurationRef.current;
     lastAlertConfigurationRef.current = configurationKey;
 
-    if (!settings.enabled || !alertTrip || !alertPickup || !alertPrediction) {
+    if (!settings.enabled || !alertTrip || !alertDropStop || !alertPrediction) {
       alertsWereEnabledRef.current = false;
       lastEtaRef.current = alertPrediction?.minutes ?? null;
       return;
@@ -344,7 +384,7 @@ export function StudentDashboardPage() {
 
     const deduplicationKey = getAlertDeduplicationKey(
       alertTrip.id,
-      alertPickup.id,
+      alertDropStop.id,
     );
     try {
       if (alertSessionKeysRef.current.has(deduplicationKey)) return;
@@ -355,12 +395,12 @@ export function StudentDashboardPage() {
       window.localStorage.setItem(deduplicationKey, "sent");
     } catch {
       setAlertMessage(
-        `Your ${settings.leadMinutes}-minute arrival alert for ${alertPickup.shortName} is due soon. We couldn't save its duplicate-protection record.`,
+        `Your ${settings.leadMinutes}-minute arrival alert for ${alertDropStop.shortName} is due soon. We couldn't save its duplicate-protection record.`,
       );
     }
     alertSessionKeysRef.current.add(deduplicationKey);
 
-    const message = `${studentBus?.label ?? "Your bus"} is about ${alertPrediction.minutes} minutes from ${alertPickup.name}.`;
+    const message = `${studentBus?.label ?? "Your bus"} is about ${alertPrediction.minutes} minutes from ${alertDropStop.name}.`;
     setAlertMessage(message);
     if (typeof Notification !== "undefined" && Notification.permission === "granted") {
       try {
@@ -373,7 +413,7 @@ export function StudentDashboardPage() {
       }
     }
   }, [
-    alertPickup,
+    alertDropStop,
     alertPrediction,
     alertTrip,
     settings.enabled,
@@ -383,6 +423,26 @@ export function StudentDashboardPage() {
 
   function updateSettings(change: Partial<EveningAlertSettings>) {
     setSettings((current) => ({ ...current, ...change }));
+  }
+
+  function selectRoute(routeId: string) {
+    const nextRoute = snapshot?.routes.find((route) => route.id === routeId);
+    const timetable = campusRouteTimetables.find((route) => route.id === routeId);
+    if (!nextRoute) return;
+    const returnStopIds = timetable
+      ? getReturnTimetable(timetable).map(({ stop }) => stop.id)
+      : [...nextRoute.stopIds].reverse();
+    const homeboundTrip = snapshot?.trips.find(
+      (trip) => trip.routeId === routeId && trip.direction === "homebound",
+    );
+    setSelectedRouteId(routeId);
+    setSelectedPickupStopId(nextRoute.stopIds[0] ?? "");
+    setSelectedBusId(null);
+    updateSettings({
+      tripId: homeboundTrip?.id ?? "",
+      pickupStopId: returnStopIds[0] ?? "",
+      dropStopId: returnStopIds[1] ?? "",
+    });
   }
 
   async function enableAlerts() {
@@ -474,13 +534,8 @@ export function StudentDashboardPage() {
         now,
       )
     : null;
-  const homeboundRouteStops =
-    alertRoute?.stopIds.flatMap((stopId) => {
-      const stop = snapshot.stops.find((item) => item.id === stopId);
-      return stop ? [stop] : [];
-    }) ?? [];
   const pickupIndex = homeboundRouteStops.findIndex(
-    (stop) => stop.id === settings.pickupStopId,
+    (stop) => stop.id === alertPickup?.id,
   );
   const allowedDropStops = homeboundRouteStops.filter(
     (_, index) => pickupIndex < 0 || index > pickupIndex,
@@ -515,11 +570,44 @@ export function StudentDashboardPage() {
               ? <>Predicted arrival {formatClock(studentPrediction.arrivalAt)} · estimated range {studentPrediction.range.earliestMinutes}–{studentPrediction.range.latestMinutes} min</>
               : "Arrival estimate unavailable until the bus sends a fresh location."}
           </p>
+          <div className="student-route-controls">
+            <label>
+              <span>CHOOSE A ROUTE</span>
+              <select value={studentRoute.id} onChange={(event) => selectRoute(event.target.value)}>
+                {snapshot.routes.map((route) => (
+                  <option key={route.id} value={route.id}>Route {route.code} · {route.name}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>PICKUP STOP</span>
+              <select
+                value={studentRouteStops.slice(0, -1).some((stop) => stop.id === selectedPickupStopId) ? selectedPickupStopId : studentRouteStops[0]?.id ?? ""}
+                onChange={(event) => setSelectedPickupStopId(event.target.value)}
+              >
+                {studentRouteStops.slice(0, -1).map((stop) => <option key={stop.id} value={stop.id}>{stop.name}</option>)}
+              </select>
+            </label>
+          </div>
           <div className="student-journey__facts">
             <div><span>ROUTE</span><strong>{studentRoute.code} · {studentRoute.name}</strong></div>
             <div><span>PICKUP STOP</span><strong><Icon name="pin" size={14} /> {assignedStop.name}</strong></div>
+            <div><span>STOP TIME</span><strong>{selectedRouteTimetable ? formatRouteTime(selectedRouteTimetable.stops.find((stop) => stop.id === assignedStop.id)?.time ?? selectedRouteTimetable.stops[0].time) : formatTripTime(studentTrip.scheduledStart, studentTrip.scheduledDate)}</strong></div>
             <div><span>SCHEDULED DEPARTURE</span><strong>{formatTripTime(studentTrip.scheduledStart, studentTrip.scheduledDate)}</strong></div>
           </div>
+          {selectedRouteTimetable && (
+            <details className="student-route-schedule">
+              <summary>View Route {studentRoute.code} stop times <Icon name="chevron" size={15} /></summary>
+              <ol>
+                {selectedRouteTimetable.stops.map((stop) => (
+                  <li key={stop.id} className={stop.id === assignedStop.id ? "student-route-schedule__selected" : ""}>
+                    <span>{stop.name}{stop.id === assignedStop.id ? " · selected" : ""}</span>
+                    <time>{formatRouteTime(stop.time)}</time>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
           <div className="student-journey__actions">
             <button className="primary-button student-track-button" onClick={trackMyBus}>
               <Icon name="map" size={17} /> Track my bus
@@ -543,7 +631,7 @@ export function StudentDashboardPage() {
             <span className="student-route-preview__stop student-route-preview__stop--end"><Icon name="pin" size={15} /></span>
             <span className="student-route-preview__bus"><Icon name="bus" size={18} /></span>
           </div>
-          <div className="student-route-preview__labels"><span>Founders Library</span><strong>Your stop · {assignedStop.shortName}</strong><span>East Campus Gate</span></div>
+          <div className="student-route-preview__labels"><span>{studentRouteStops[0]?.shortName}</span><strong>Your stop · {assignedStop.shortName}</strong><span>{studentRouteStops[studentRouteStops.length - 1]?.shortName}</span></div>
           <div className="student-traffic"><span className={`traffic-dot traffic-dot--${studentPosition.traffic}`} /> Simulated traffic: {studentPosition.traffic}</div>
         </div>
       </section>
@@ -562,7 +650,7 @@ export function StudentDashboardPage() {
         <div className="student-map-layout">
           <div className="student-map">
             <CampusMap
-              routes={snapshot.routes}
+              routes={[studentRoute]}
               positions={mapPositions}
               selectedBusId={selectedBusId}
               stops={snapshot.stops}
@@ -617,8 +705,7 @@ export function StudentDashboardPage() {
           </aside>
         </div>
         <div className="student-map-legend">
-          <span><i className="map-legend__bus map-legend__bus--mint" /> North loop</span>
-          <span><i className="map-legend__bus map-legend__bus--blue" /> Garden district</span>
+          <span><i className="map-legend__bus map-legend__bus--mint" /> Route {studentRoute.code} · {studentRoute.name}</span>
           <span><i className="map-legend__stop" /> Your assigned stop</span>
           <span className="student-map-legend__disclaimer">Predictions are illustrative prototype estimates, not validated machine-learning results.</span>
         </div>
@@ -634,7 +721,7 @@ export function StudentDashboardPage() {
             </div>
             <span className="student-alert-card__icon"><Icon name="bell" size={19} /></span>
           </div>
-          {!alertTrip || !alertRoute || !alertPickup ? (
+          {!alertTrip || !alertRoute || !alertPickup || !alertDropStop ? (
             <div className="student-empty-state">
               No homebound trip is assigned yet. Your campus team can add one.
             </div>
@@ -647,14 +734,12 @@ export function StudentDashboardPage() {
                   onChange={(event) => {
                     const nextTrip = homeboundTrips.find((trip) => trip.id === event.target.value);
                     const nextRoute = snapshot.routes.find((route) => route.id === nextTrip?.routeId);
-                    const routeStops = nextRoute?.stopIds.flatMap((stopId) => {
-                      const stop = snapshot.stops.find((item) => item.id === stopId);
-                      return stop ? [stop] : [];
-                    }) ?? [];
+                    const timetable = campusRouteTimetables.find((route) => route.id === nextRoute?.id);
+                    const returnSchedule = timetable ? getReturnTimetable(timetable) : [];
                     updateSettings({
                       tripId: event.target.value,
-                      pickupStopId: routeStops[0]?.id ?? "",
-                      dropStopId: routeStops[1]?.id ?? "",
+                      pickupStopId: returnSchedule[0]?.stop.id ?? "",
+                      dropStopId: returnSchedule[1]?.stop.id ?? "",
                     });
                   }}
                 >
@@ -682,7 +767,7 @@ export function StudentDashboardPage() {
                       });
                     }}
                   >
-                    {homeboundRouteStops.map((stop) => <option key={stop.id} value={stop.id}>{stop.name}</option>)}
+                    {homeboundRouteStops.map((stop) => <option key={stop.id} value={stop.id}>{stop.name} · {formatRouteTime(homeboundTimeByStop.get(stop.id) ?? "16:00")}</option>)}
                   </select>
                 </label>
                 <label>
@@ -692,7 +777,7 @@ export function StudentDashboardPage() {
                     onChange={(event) => updateSettings({ dropStopId: event.target.value })}
                     disabled={allowedDropStops.length === 0}
                   >
-                    {allowedDropStops.map((stop) => <option key={stop.id} value={stop.id}>{stop.name}</option>)}
+                    {allowedDropStops.map((stop) => <option key={stop.id} value={stop.id}>{stop.name} · {formatRouteTime(homeboundTimeByStop.get(stop.id) ?? "16:00")}</option>)}
                   </select>
                 </label>
               </div>
@@ -736,8 +821,8 @@ export function StudentDashboardPage() {
             <p>
               {alertPosition && alertPosition.status !== "LIVE"
                 ? `${snapshot.buses.find((bus) => bus.id === alertAssignment?.busId)?.label ?? "Your bus"} GPS is ${alertPosition.status.toLowerCase()}; arrival alerts are paused until a fresh location is available.`
-                : alertPrediction && alertTrip && alertPickup
-                  ? `${snapshot.buses.find((bus) => bus.id === alertAssignment?.busId)?.label ?? "Your bus"} is currently estimated to reach ${alertPickup.name} in about ${alertPrediction.minutes} min.`
+                : alertPrediction && alertTrip && alertDropStop
+                  ? `${snapshot.buses.find((bus) => bus.id === alertAssignment?.busId)?.label ?? "Your bus"} is currently estimated to reach ${alertDropStop.name} in about ${alertPrediction.minutes} min.`
                   : "Arrival time is estimated from simulated bus position and demo traffic."}
               {" "}Browser notifications need permission and only work while this demo is open; they cannot run in the background after it closes.
             </p>

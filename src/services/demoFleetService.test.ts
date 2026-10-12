@@ -21,7 +21,7 @@ function rfidEvent(overrides: Partial<RfidTapPayload> = {}): IntegrationEvent<Rf
       cardNumber: "DEMO-RFID-018",
       readerId: "reader-library",
       tripId: "trip-morning-01",
-      stopId: "stop-library",
+      stopId: "stop-r1-thiruvottiyur",
       eventType: "boarded",
       ...overrides,
     },
@@ -60,6 +60,16 @@ describe("DemoFleetService", () => {
     delete legacy.ingestionAudit;
     delete legacy.driverIncidents;
     delete legacy.tripLifecycleEvents;
+    legacy.stops = (legacy.stops as Record<string, unknown>[]).map((stop) =>
+      stop.id === "stop-campus"
+        ? { ...stop, latitude: 13.0202, longitude: 79.9828 }
+        : stop,
+    );
+    legacy.trips = (legacy.trips as Record<string, unknown>[]).map((trip) =>
+      trip.id === "trip-next-01"
+        ? { ...trip, scheduledStart: "23:57", scheduledEnd: "00:25", scheduledDate: "2026-10-12" }
+        : trip,
+    );
     legacy.loraNodes = [
       { id: "lora-library", name: "Library node", stopId: "stop-library", status: "active", lastSeenAt: new Date().toISOString() },
     ];
@@ -69,8 +79,17 @@ describe("DemoFleetService", () => {
     expect(snapshot.trips.find((trip) => trip.id === "trip-morning-01")?.direction).toBe("outbound");
     expect(snapshot.loraGateways).toHaveLength(1);
     expect(snapshot.loraNodes.find((node) => node.id === "lora-reader-library")).toMatchObject({
-      gatewayId: "gateway-northstar",
+      gatewayId: "gateway-rec-south",
       readerId: "reader-library",
+    });
+    expect(snapshot.stops.find((stop) => stop.id === "stop-campus")).toMatchObject({
+      latitude: 12.9730868,
+      longitude: 80.2430635,
+    });
+    expect(snapshot.trips.find((trip) => trip.id === "trip-next-01")).toMatchObject({
+      scheduledStart: "09:25",
+      scheduledEnd: "09:53",
+      scheduledDate: undefined,
     });
     expect(snapshot.tripLifecycleEvents).toEqual([]);
   });
@@ -81,16 +100,16 @@ describe("DemoFleetService", () => {
     const routeId = initial.trips.find((trip) => trip.id === "trip-homebound-01")?.routeId;
     await service.assignTrip({
       tripId: "trip-homebound-01",
-      busId: "bus-cascade",
+      busId: "bus-spare",
       trackerId: "tracker-spare",
-      driverId: "driver-rohan",
+      driverId: "driver-spare",
     });
     const updated = await service.getSnapshot();
     expect(updated.trips.find((trip) => trip.id === "trip-homebound-01")?.routeId).toBe(routeId);
     expect(updated.tripAssignments.find((item) => item.tripId === "trip-homebound-01")).toMatchObject({
-      busId: "bus-cascade",
+      busId: "bus-spare",
       trackerId: "tracker-spare",
-      driverId: "driver-rohan",
+      driverId: "driver-spare",
     });
   });
 
@@ -99,14 +118,15 @@ describe("DemoFleetService", () => {
     const snapshot = await service.getSnapshot();
     const currentTrip = snapshot.trips.find((item) => item.id === "trip-morning-01");
     if (!currentTrip) throw new Error("Fixture active trip is missing.");
-    const windowStart = new Date(`${currentTrip.scheduledDate}T${currentTrip.scheduledStart}:00`);
-    const windowEnd = new Date(`${currentTrip.scheduledDate}T${currentTrip.scheduledEnd}:00`);
-    const tripStart = new Date(Math.max(Date.now(), windowStart.getTime() + 60_000));
+    const scheduleDate = currentTrip.scheduledDate ?? new Date().toISOString().slice(0, 10);
+    const windowStart = new Date(`${scheduleDate}T${currentTrip.scheduledStart}:00`);
+    const windowEnd = new Date(`${scheduleDate}T${currentTrip.scheduledEnd}:00`);
+    const tripStart = new Date(windowStart.getTime() + 60_000);
     const tripEnd = new Date(Math.min(windowEnd.getTime(), tripStart.getTime() + 5 * 60_000));
     const formatClock = (date: Date) => `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     const trip = await service.createTrip({
       routeId: "route-north",
-      scheduledDate: currentTrip.scheduledDate,
+      scheduledDate: scheduleDate,
       scheduledStart: formatClock(tripStart),
       scheduledEnd: formatClock(tripEnd),
       direction: "outbound",
@@ -164,7 +184,7 @@ describe("DemoFleetService", () => {
       timestamp: new Date(Date.now() - 180_000).toISOString(),
       source: { kind: "simulator", deviceId: "DEMO-GPS-017", adapter: "test-gps-adapter" },
       idempotencyKey: eventId,
-      payload: { tripId: "trip-morning-01", trackerId: "tracker-17", busId: "bus-aurora", latitude: 12.972, longitude: 77.596, speedKph: 12 },
+      payload: { tripId: "trip-morning-01", trackerId: "tracker-17", busId: "bus-aurora", latitude: 13.16, longitude: 80.3, speedKph: 12 },
     };
     expect(await service.recordGpsTelemetry(event)).toBe("accepted");
     expect(await service.recordGpsTelemetry(event)).toBe("duplicate");
@@ -185,7 +205,7 @@ describe("DemoFleetService", () => {
       timestamp: new Date().toISOString(),
       source: { kind: "device", deviceId: "demo-reader-garden", adapter: "test-radio-adapter" },
       idempotencyKey: "lora-sequence-12",
-      payload: { nodeId: "lora-reader-garden", gatewayId: "gateway-northstar", status: "active", batteryPercent: 58, rssiDbm: -74, snrDb: 5.1 },
+      payload: { nodeId: "lora-reader-garden", gatewayId: "gateway-rec-south", status: "active", batteryPercent: 58, rssiDbm: -74, snrDb: 5.1 },
     };
     expect(await service.recordLoraHealth(event)).toBe("accepted");
     const snapshot = await service.getSnapshot();
@@ -206,8 +226,8 @@ describe("DemoFleetService", () => {
     snapshot.gpsTelemetry = [{
       id: "gps-ingested-legacy",
       trackerId: "tracker-17",
-      latitude: 12.9719,
-      longitude: 77.5948,
+      latitude: 13.16,
+      longitude: 80.3,
       speedKph: 13,
       recordedAt: new Date().toISOString(),
     }];

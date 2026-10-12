@@ -13,15 +13,15 @@ const destination = {
   id: "stop-destination",
   name: "Destination",
   shortName: "Destination",
-  latitude: 12.9762,
-  longitude: 77.6014,
+  latitude: 13.1667,
+  longitude: 80.3008,
   sequence: 2,
 };
 
 describe("prototype arrival predictions", () => {
   const input = {
-    latitude: 12.9719,
-    longitude: 77.5948,
+    latitude: 13.1604,
+    longitude: 80.3002,
     destination,
     stopsRemaining: 1,
     historicalMinutesPerStop: [6, 8, 7],
@@ -77,14 +77,14 @@ describe("simulated map positions", () => {
     const route = snapshot.routes.find((item) => item.id === aurora?.routeId);
     const routeStops = snapshot.stops.filter((stop) => route?.stopIds.includes(stop.id));
 
-    expect(positions).toHaveLength(5);
-    expect(aurora?.latitude).toBeGreaterThan(12.9719);
-    expect(aurora?.longitude).toBeGreaterThan(77.5948);
+    expect(positions).toHaveLength(14);
+    expect(aurora?.latitude).toBeGreaterThan(13.1604);
+    expect(aurora?.longitude).toBeGreaterThan(80.3002);
     expect(
       positions.find((position) => position.tripId === "trip-homebound-01")?.status,
     ).toBe("LIVE");
     expect(
-      stopsUntilDestination(routeStops, aurora?.segmentIndex ?? 0, "stop-residences"),
+      stopsUntilDestination(routeStops, aurora?.segmentIndex ?? 0, "stop-r1-tollgate"),
     ).toBe(1);
   });
 
@@ -121,17 +121,17 @@ describe("arrival alert helpers", () => {
   it("deduplicates a trip and pickup on the same day but allows the next day", () => {
     const first = getAlertDeduplicationKey(
       "trip-homebound-01",
-      "stop-garden",
+      "stop-r2-singapore-shopping",
       new Date(2026, 9, 6),
     );
     const sameDay = getAlertDeduplicationKey(
       "trip-homebound-01",
-      "stop-garden",
+      "stop-r2-singapore-shopping",
       new Date(2026, 9, 6, 18),
     );
     const nextDay = getAlertDeduplicationKey(
       "trip-homebound-01",
-      "stop-garden",
+      "stop-r2-singapore-shopping",
       new Date(2026, 9, 7),
     );
 
@@ -149,15 +149,15 @@ describe("arrival alert helpers", () => {
     expect(isEveningAlertSettings({
       enabled: true,
       tripId: "trip-homebound-01",
-      pickupStopId: "stop-library",
-      dropStopId: "stop-residences",
+      pickupStopId: "stop-campus",
+      dropStopId: "stop-r1-thiruvottiyur",
       leadMinutes: 15,
     })).toBe(true);
     expect(isEveningAlertSettings({
       enabled: true,
       tripId: "trip-homebound-01",
-      pickupStopId: "stop-library",
-      dropStopId: "stop-residences",
+      pickupStopId: "stop-campus",
+      dropStopId: "stop-r1-thiruvottiyur",
       leadMinutes: 12,
     })).toBe(false);
   });

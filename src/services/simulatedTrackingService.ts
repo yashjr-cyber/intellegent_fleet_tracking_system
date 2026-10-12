@@ -77,10 +77,13 @@ export function getSimulatedBusPositions(
     const tracker = trackersById.get(assignment.trackerId);
     const bus = busesById.get(assignment.busId);
     if (!route || !tracker || !bus) return [];
-    const routeStops = route.stopIds.flatMap((stopId) => {
+    const outboundStops = route.stopIds.flatMap((stopId) => {
       const stop = stopsById.get(stopId);
       return stop ? [stop] : [];
     });
+    const routeStops = trip.direction === "homebound"
+      ? [...outboundStops].reverse()
+      : outboundStops;
     if (routeStops.length < 2) return [];
 
     const telemetry = snapshot.gpsTelemetry

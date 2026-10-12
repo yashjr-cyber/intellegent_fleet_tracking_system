@@ -74,12 +74,9 @@ export function DashboardLayout({
   return (
     <div className="app-shell">
       <aside className={`sidebar${menuOpen ? " sidebar--open" : ""}`}>
-        <div className="sidebar__brand"><Brand /></div>
-        <div className="workspace-label">WORKSPACE</div>
-        <div className="workspace-pill">
-          <span className="workspace-pill__crest">N</span>
-          <span><strong>Northstar Institute</strong><small>Campus mobility</small></span>
-          <Icon name="chevron" size={16} />
+        <div className="sidebar__brand">
+          <Brand />
+          <img className="sidebar__rec-crest" src="/rec-crest.png" alt="Rajalakshmi Engineering College crest" />
         </div>
         <div className="sidebar__section-label">YOUR SPACE</div>
         <nav className="sidebar__nav" aria-label={`${info.label} navigation`}>
@@ -122,10 +119,12 @@ export function DashboardLayout({
           >
             <Icon name="menu" size={21} />
           </button>
-          <div className="breadcrumb"><span>Northstar Institute</span><Icon name="chevron" size={15} /><strong>{info.label.toLowerCase()}</strong></div>
+          <div className="breadcrumb">
+            <img className="breadcrumb__logo" src="https://www.rajalakshmi.org/logo.svg" alt="" />
+            <span>REC · South Campus, Perungudi</span><Icon name="chevron" size={15} /><strong>{info.label.toLowerCase()}</strong>
+          </div>
           <div className="topbar__right">
             <div className="system-live"><span className="live-dot" /> DEMO SYSTEM</div>
-            <button className="icon-button" aria-label="Notifications"><Icon name="bell" size={19} /><span className="notification-dot" /></button>
             <span className="avatar avatar--small">{info.initials}</span>
           </div>
         </header>
@@ -144,7 +143,6 @@ export function DashboardLayout({
               </p>
             </div>
             <div className="page-heading__actions">
-              <button className="soft-button"><Icon name="clock" size={16} /> Today <Icon name="chevron" size={14} /></button>
               <button
                 className="primary-button"
                 onClick={() => {
@@ -161,7 +159,7 @@ export function DashboardLayout({
             </div>
           </div>
           {children}
-          <div className="demo-footer"><span>WAYFINDER · NORTHSTAR INSTITUTE</span><span>FICTIONAL DEMO DATA — PREVIEW ONLY</span></div>
+          <div className="demo-footer"><span>WAYFINDER · REC SOUTH CAMPUS, PERUNGUDI</span><span>FICTIONAL DEMO DATA — PREVIEW ONLY</span></div>
         </div>
       </main>
       {menuOpen && <button className="sidebar-backdrop" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}

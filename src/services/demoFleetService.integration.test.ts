@@ -30,8 +30,8 @@ function gpsEvent(
       tripId: "trip-morning-01",
       trackerId: "tracker-17",
       busId: "bus-aurora",
-      latitude: 12.972,
-      longitude: 77.596,
+      latitude: 13.16,
+      longitude: 80.3,
       speedKph: 18,
       ...payload,
     },
@@ -53,7 +53,7 @@ function loraEvent(
     ...overrides,
     payload: {
       nodeId: "lora-reader-library",
-      gatewayId: "gateway-northstar",
+      gatewayId: "gateway-rec-south",
       status: "active",
       batteryPercent: 80,
       rssiDbm: -70,
@@ -80,7 +80,7 @@ function rfidEvent(
       cardNumber: "DEMO-RFID-018",
       readerId: "reader-library",
       tripId: "trip-morning-01",
-      stopId: "stop-library",
+      stopId: "stop-r1-thiruvottiyur",
       eventType: "boarded",
       ...payload,
     },
@@ -109,7 +109,7 @@ describe("integration event boundary validation", () => {
     const service = new DemoFleetService(new MemoryStorage());
     const wrongType = gpsEvent({}, { eventType: "gps.unknown.v1" });
     const gatewaySource = gpsEvent({}, {
-      source: { kind: "gateway", deviceId: "gateway-northstar", adapter: "test-gps-adapter" },
+      source: { kind: "gateway", deviceId: "gateway-rec-south", adapter: "test-gps-adapter" },
     });
     const futureEvent = gpsEvent({}, {
       timestamp: new Date(Date.now() + 6 * 60_000).toISOString(),
@@ -149,7 +149,7 @@ describe("integration event boundary validation", () => {
 
   it("rejects LoRa health with an unknown node or inactive gateway", async () => {
     const service = new DemoFleetService(new MemoryStorage());
-    await service.updateGatewayStatus("gateway-northstar", "inactive");
+    await service.updateGatewayStatus("gateway-rec-south", "inactive");
 
     expect(await service.recordLoraHealth(loraEvent())).toBe("rejected");
     expect(await service.recordLoraHealth(loraEvent({ nodeId: "unknown-node" }))).toBe("rejected");
