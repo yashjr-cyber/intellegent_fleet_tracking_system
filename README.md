@@ -11,6 +11,18 @@ npm run dev
 
 Use the sign-in screen to enter the Student, Driver, or Campus team demo. Demo role selection is stored for the current browser tab; sign out from the profile control to switch roles.
 
+To preview the development server from a phone on the same Wi-Fi, run `npm run dev -- --host 0.0.0.0` and open `http://<computer-lan-ip>:5173` on the phone. Network/firewall settings may block LAN access; `http://localhost:5173` is only reachable from the computer itself.
+
+## Free MVP hosting
+
+The repository includes a GitHub Actions workflow that builds, tests, and deploys the static Vite app to GitHub Pages on pushes to `main` or the mobility feature branch. Once Pages is enabled for the repository and the workflow completes, the project URL is:
+
+`https://yashjr-cyber.github.io/intellegent_fleet_tracking_system/`
+
+Direct role URLs are restored through the Pages 404 fallback. The hosted site remains a public demo: its role picker is not authentication, each browser has its own local demo data, and no backend, real GPS/GNSS, or LoRa API is connected. Do not enter personal or sensitive data. This static deployment is suitable for a small judging/demo audience (around 100 viewers) because the site files are CDN-served; map tiles still depend on the public OpenStreetMap tile service and its usage policy. For shared live fleet data, real users, or device ingestion, add a separately secured backend and database before scaling those capabilities.
+
+The first deployment requires GitHub Pages to be enabled with **Build and deployment: GitHub Actions** in repository settings. Deployment status is available in the Actions tab.
+
 ## Foundation
 
 - `src/types/models.ts` defines the typed domain records and `FleetSnapshot`.
