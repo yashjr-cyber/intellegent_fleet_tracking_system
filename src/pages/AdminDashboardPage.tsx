@@ -270,7 +270,7 @@ function LoraTopology({ snapshot, act }: { snapshot: FleetSnapshot; act: (callba
     </section>
     <Panel title="Integration contract preview" eyebrow="HARDWARE BOUNDARY">
       <p className="subtle-copy">Versioned JSON envelopes are validated at the demo service edge. A production adapter still needs authentication, transport security, server-side authorization, durable storage, replay controls and hardware-specific protocol mapping.</p>
-      <pre className="integration-example">{JSON.stringify({ eventId: "demo-event-001", eventType: "lora.health.v1", schemaVersion: 1, timestamp: "2026-10-06T08:30:00Z", source: { kind: "device", deviceId: "demo-reader-garden", adapter: "lora-gateway-adapter" }, idempotencyKey: "gateway-001:seq-42", payload: { nodeId: "lora-reader-garden", gatewayId: "gateway-northstar", status: "active", batteryPercent: 63, rssiDbm: -78, snrDb: 4.6 } }, null, 2)}</pre>
+      <pre className="integration-example">{JSON.stringify({ eventId: "demo-event-001", eventType: "lora.health.v1", schemaVersion: 1, timestamp: "2026-10-06T08:30:00Z", source: { kind: "device", deviceId: "demo-reader-garden", adapter: "lora-gateway-adapter" }, idempotencyKey: "gateway-001:seq-42", payload: { nodeId: "lora-reader-garden", gatewayId: "gateway-rec-south", status: "active", batteryPercent: 63, rssiDbm: -78, snrDb: 4.6 } }, null, 2)}</pre>
     </Panel>
   </>;
 }

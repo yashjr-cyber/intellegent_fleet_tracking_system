@@ -49,16 +49,21 @@ export function SignInPage() {
       <div className="signin__ambient signin__ambient--two" />
       <header className="signin__topbar">
         <Brand />
-        <span className="topbar-note"><span className="live-dot" /> Your campus, connected</span>
+        <span className="topbar-note">South Campus · Perungudi</span>
       </header>
 
       <section className="signin__content">
         <div className="signin__copy">
-          <p className="eyebrow"><span /> MOBILITY, IN GOOD COMPANY</p>
-          <h1>Every journey<br />has a <span>better way.</span></h1>
+          <p className="eyebrow"><span /> RAJALAKSHMI ENGINEERING COLLEGE · SOUTH CAMPUS, PERUNGUDI</p>
+          <img
+            className="signin__institution-logo"
+            src="https://www.rajalakshmi.org/logo.svg"
+            alt="Rajalakshmi Engineering College"
+          />
+          <h1>Campus travel,<br /><span>thoughtfully connected.</span></h1>
           <p className="signin__description">
             A little more clarity for the journeys that bring your campus together.
-            Welcome to a calmer kind of commute.
+            Explore a simple, shared view of campus mobility.
           </p>
           <div className="signin__proof">
             <span className="proof-avatars" aria-hidden="true">

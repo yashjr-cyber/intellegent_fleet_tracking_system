@@ -53,13 +53,17 @@ export function DashboardPage({
     : snapshot.tripAssignments[0];
   const trip = snapshot.trips.find((item) => item.id === assignment?.tripId);
   const route = snapshot.routes.find((item) => item.id === trip?.routeId);
+  const routeStops = route?.stopIds.flatMap((stopId) => {
+    const stop = snapshot.stops.find((item) => item.id === stopId);
+    return stop ? [stop] : [];
+  }) ?? [];
   const bus = snapshot.buses.find((item) => item.id === assignment?.busId);
   const telemetry = snapshot.gpsTelemetry.find((item) => item.trackerId === assignment?.trackerId);
 
   const stats = role === "driver"
     ? [
         { label: "Today's trips", value: "4", note: "1 trip in progress", icon: "map" as const, tone: "mint" },
-        { label: "Next departure", value: "09:00", note: "Garden district · G-02", icon: "clock" as const, tone: "blue" },
+        { label: "Next departure", value: "09:00", note: "Route 2 · Ambattur Singapore Shopping", icon: "clock" as const, tone: "blue" },
         { label: "Assigned vehicle", value: bus?.label ?? "Aurora", note: bus?.registration ?? "DEMO-101", icon: "bus" as const, tone: "violet" },
       ]
     : [
@@ -92,12 +96,12 @@ export function DashboardPage({
               <path d="M57 200 C130 200 118 108 218 108 S323 195 390 154 459 71 521 98 593 192 653 122" fill="none" stroke="rgba(82,220,183,.16)" strokeWidth="15" strokeLinecap="round" />
               <path d="M57 200 C130 200 118 108 218 108 S323 195 390 154 459 71 521 98 593 192 653 122" fill="none" stroke="#57d8b5" strokeWidth="3" strokeDasharray="5 8" strokeLinecap="round" />
             </svg>
-            <span className="map-label map-label--one"><Icon name="pin" size={13} /> Library</span>
-            <span className="map-label map-label--two"><Icon name="pin" size={13} /> North residences</span>
-            <span className="map-label map-label--three"><Icon name="pin" size={13} /> East gate</span>
+            <span className="map-label map-label--one"><Icon name="pin" size={13} /> {routeStops[0]?.name ?? "Route stop"}</span>
+            <span className="map-label map-label--two"><Icon name="pin" size={13} /> {routeStops[1]?.name ?? "Pickup stop"}</span>
+            <span className="map-label map-label--three"><Icon name="pin" size={13} /> {routeStops[routeStops.length - 1]?.name ?? "South Campus"}</span>
             <span className="map-bus map-bus--one"><Icon name="bus" size={17} /></span>
             <span className="map-bus map-bus--two"><Icon name="bus" size={17} /></span>
-            <div className="map-campus-label">NORTHSTAR<br />CAMPUS</div>
+            <div className="map-campus-label">RAJALAKSHMI<br />SOUTH CAMPUS</div>
             <div className="map-scale"><span /> 500 m</div>
           </div>
           <div className="map-card__footer">
@@ -114,12 +118,12 @@ export function DashboardPage({
           <div className="activity-list">
             <div className="activity-item">
               <span className="activity-item__icon activity-item__icon--mint"><Icon name="bus" size={17} /></span>
-              <span className="activity-item__body"><strong>North loop in progress</strong><small>Mira Sen · 6 stops remaining</small></span>
+              <span className="activity-item__body"><strong>{route?.name ?? "Route 1"} in progress</strong><small>Mira Sen · 6 stops remaining</small></span>
               <span className="activity-item__time">4 min</span>
             </div>
             <div className="activity-item">
               <span className="activity-item__icon activity-item__icon--blue"><Icon name="pin" size={17} /></span>
-              <span className="activity-item__body"><strong>{role === "driver" ? "Next: North Residences" : "Pickup at Residences"}</strong><small>North loop · stop 2 of 3</small></span>
+              <span className="activity-item__body"><strong>{role === "driver" ? `Next: ${routeStops[1]?.name ?? "Route stop"}` : `Pickup at ${routeStops[1]?.name ?? "your stop"}`}</strong><small>{route?.name ?? "Route 1"} · stop 2 of {routeStops.length}</small></span>
               <span className="activity-item__time">08:21</span>
             </div>
             <div className="activity-item">
@@ -141,13 +145,13 @@ export function DashboardPage({
           <div className="schedule-row">
             <span className="schedule-time">08:15<small>AM</small></span>
             <span className="schedule-timeline"><i /></span>
-            <span className="schedule-details"><strong>North loop</strong><small>{route?.name ?? "North loop"} · {route?.estimatedDurationMinutes ?? 28} min</small></span>
+            <span className="schedule-details"><strong>Route 1 · Thiruvottiyur</strong><small>{route?.name ?? "Thiruvottiyur"} · {route?.estimatedDurationMinutes ?? 105} min</small></span>
             <span className="schedule-tag schedule-tag--active">In progress</span>
           </div>
           <div className="schedule-row">
             <span className="schedule-time">09:00<small>AM</small></span>
             <span className="schedule-timeline"><i /></span>
-            <span className="schedule-details"><strong>Garden district</strong><small>Garden Quarter · {bus?.label === "Cascade" ? "DEMO-204" : "Cascade"}</small></span>
+            <span className="schedule-details"><strong>Route 2 · Ambattur Singapore Shopping</strong><small>Singapore Shopping · {bus?.label === "Cascade" ? "DEMO-204" : "Cascade"}</small></span>
             <span className="schedule-tag">Upcoming</span>
           </div>
         </article>
@@ -155,7 +159,7 @@ export function DashboardPage({
           <div className="people-card__head"><div className="avatar-stack"><span>AR</span><span>IM</span><span>KS</span><span>+8</span></div><span className="people-card__count">11 <small>on this route</small></span></div>
           <h2>Every journey, connected.</h2>
           <p>{role === "driver" ? "Your passenger list is ready when you are." : "A little easier when the whole campus moves together."}</p>
-          <div className="people-card__foot"><span><Icon name="users" size={16} /> {role === "admin" ? "People & attendance" : "North loop community"}</span><Icon name="chevron" size={16} /></div>
+          <div className="people-card__foot"><span><Icon name="users" size={16} /> {role === "admin" ? "People & attendance" : `${route?.name ?? "Route 1"} community`}</span><Icon name="chevron" size={16} /></div>
         </article>
       </section>
     </DashboardLayout>

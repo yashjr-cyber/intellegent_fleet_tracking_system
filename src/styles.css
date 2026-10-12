@@ -659,3 +659,283 @@ button:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
   .admin-toolbar > * { align-self: stretch; }
   .admin-quick-links > button { flex: 1 1 42%; justify-content: center; }
 }
+
+/* Rajalakshmi Engineering College South Campus palette: purple, white, and a restrained gold accent. */
+:root {
+  color: #28212e;
+  background: #f6f3f8;
+  --bg: #f6f3f8;
+  --panel: rgba(255, 255, 255, .94);
+  --panel-border: rgba(106, 27, 154, .12);
+  --muted: #716a78;
+  --mint: #6a1b9a;
+  --text: #28212e;
+}
+
+body { min-width: 320px; color: #28212e; background: #f6f3f8; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #6a1b9a; outline-offset: 2px; }
+::selection { color: #fff; background: #6a1b9a; }
+.glass-panel {
+  border-color: rgba(87, 58, 103, .12);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 8px 24px rgba(44, 27, 52, .055), inset 0 1px 0 #fff;
+  backdrop-filter: blur(6px);
+}
+.signin {
+  color: #28212e;
+  background: radial-gradient(ellipse at 82% 22%, rgba(106, 27, 154, .08), transparent 42%), #f7f4f9;
+}
+.signin__ambient { border-color: rgba(106, 27, 154, .07); }
+.signin__ambient--one { border-color: rgba(181, 138, 35, .12); }
+.topbar-note, .signin__footer { color: #625a69; }
+.signin__copy .eyebrow, .eyebrow { color: #6a1b9a; }
+.signin__copy .eyebrow span { background: #b58a23; }
+.signin__copy h1 { color: #2b1e32; }
+.signin__copy h1 span { color: #6a1b9a; }
+.signin__description, .signin__proof { color: #655d6b; }
+.signin__proof strong { color: #302638; }
+.proof-avatars span, .avatar-stack span { border-color: #f7f4f9; color: #fff; background: #6a1b9a; }
+.proof-avatars span:nth-child(2) { background: #8650a2; }
+.proof-avatars span:nth-child(3) { background: #b58a23; }
+.signin-card__heading h2 { color: #2d2434; }
+.signin-card__heading p:not(.eyebrow), .role-option__copy small { color: #716a78; }
+.signin-card__spark, .role-option__icon, .demo-notice__icon { color: #6a1b9a; background: #f3e8ff; }
+.role-option { border-color: #e9e1ed; color: #342a3b; background: #fff; }
+.role-option:hover { border-color: #a57ab9; background: #fbf7fd; }
+.role-option__icon--driver { color: #74508a; background: #f1e9f5; }
+.role-option__icon--admin { color: #966d1a; background: #f8f2e4; }
+.role-option__arrow { color: #6a1b9a; }
+.demo-notice { border: 1px solid #eadff0; background: #fbf8fd; }
+.demo-notice p { color: #696170; }
+.demo-notice strong { color: #392c43; }
+.signin__footer { color: #756d7a; }
+.status-indicator, .live-dot { background: #6a1b9a; box-shadow: none; }
+.footer-separator { color: #b58a23; }
+
+.app-shell { color: #28212e; background: #f6f3f8; }
+.sidebar { border-right-color: rgba(255, 255, 255, .14); background: #6a1b9a; backdrop-filter: blur(8px); }
+.sidebar .brand__wordmark, .workspace-pill strong, .profile-button__copy strong { color: #fff; }
+.sidebar .brand__wordmark span, .workspace-label, .sidebar__section-label, .workspace-pill small, .profile-button__copy small { color: rgba(255, 255, 255, .72); }
+.sidebar .brand__mark { border-color: rgba(255, 255, 255, .3); color: #fff; background: rgba(255, 255, 255, .12); }
+.workspace-pill { border-color: rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .09); }
+.workspace-pill__crest { color: #6a1b9a; background: #f1e5f7; }
+.workspace-pill > svg, .sidebar .nav-item svg { color: rgba(255, 255, 255, .75); }
+.nav-item { color: rgba(255, 255, 255, .8); }
+.nav-item:hover { color: #fff; background: rgba(255, 255, 255, .1); }
+.nav-item--active { color: #fff; background: rgba(255, 255, 255, .17); }
+.nav-item--active svg, .nav-item__active-mark { color: #fff; background: #e9cf7a; }
+.help-card { border-color: rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .09); }
+.help-card__icon { color: #f2d98e; background: rgba(255, 255, 255, .12); }
+.help-card strong { color: #fff; }
+.help-card p, .profile-button { color: rgba(255, 255, 255, .73); }
+.profile-button { border-top-color: rgba(255, 255, 255, .18); }
+.avatar { border-color: rgba(255, 255, 255, .35); color: #fff; background: #8b55a3; }
+.dashboard-main { background: radial-gradient(ellipse at 90% 2%, rgba(106, 27, 154, .035), transparent 34%), #f6f3f8; }
+.topbar { border-bottom-color: #e7e0eb; background: rgba(255, 255, 255, .92); backdrop-filter: blur(8px); }
+.breadcrumb, .topbar__right { color: #6d6574; }
+.breadcrumb svg { color: #9c8ba6; }
+.breadcrumb strong { color: #3b3043; }
+.system-live { color: #6a1b9a; }
+.system-live .live-dot { background: #6a1b9a; }
+.icon-button { border-color: #e7e0eb; color: #5d4b69; background: #fff; }
+.notification-dot { border-color: #fff; background: #b58a23; }
+.page-heading .eyebrow { color: #6a1b9a; }
+.page-heading h1 { color: #2b2232; }
+.page-heading > div:first-child > p:last-child { color: #696170; }
+.dashboard-content h2, .dashboard-content h3, .dashboard-content h1,
+.dashboard-content strong, .dashboard-content th, .dashboard-content td,
+.dashboard-content dd, .dashboard-content dt { color: #342a3b; }
+.dashboard-content p:not(.eyebrow), .dashboard-content small,
+.student-journey__freshness, .student-map-legend, .subtle-copy { color: #696170; }
+.page-heading .eyebrow, .student-card-heading .eyebrow, .student-attendance-card__heading .eyebrow,
+.student-journey__facts > div > span, .student-alert-form label > span,
+.admin-subheading, .admin-toolbar label { color: #6a1b9a; }
+.primary-button { border-color: #6a1b9a; color: #fff; background: #6a1b9a; }
+.primary-button:hover { border-color: #5a1582; color: #fff; background: #5a1582; }
+.soft-button { border-color: #ded4e4; color: #55465e; background: #fff; }
+.soft-button:hover { border-color: #b89dc5; color: #5a1582; background: #fcf9fd; }
+.text-button { color: #6a1b9a; }
+.text-button:hover { color: #4b0d72; }
+.stat-icon--mint { color: #6a1b9a; background: #f3e8ff; }
+.stat-icon--blue { color: #48668f; background: #edf2fb; }
+.stat-icon--violet { color: #856219; background: #f8f1df; }
+.demo-footer { border-top-color: #e6dfea; color: #6d6574; }
+
+.student-journey-hero {
+  border-color: #e5d8ec;
+  background: radial-gradient(ellipse at 85% 30%, rgba(106, 27, 154, .045), transparent 36%), #fff;
+}
+.tracking-pill { border-color: #e6dbea; color: #5c4668; background: #f7f2fa; }
+.tracking-pill--live { border-color: #c9b4d6; color: #5a1582; background: #f5edf9; }
+.tracking-pill--live .status-indicator { background: #6a1b9a; }
+.tracking-pill--stale { border-color: #ead8a5; color: #775c13; background: #fbf6e7; }
+.tracking-pill--offline { border-color: #e5c7c5; color: #914742; background: #fcf2f1; }
+.student-journey__eta { color: #6a1b9a; }
+.student-journey__eta-label, .student-journey-hero h2, .student-journey__range { color: #342a3b; }
+.student-journey__facts strong { color: #3e3346; }
+.student-journey__facts strong svg { color: #6a1b9a; }
+.student-journey__freshness .status-indicator { background: #6a1b9a; }
+.student-journey-hero__side { border-color: #eee6f1; background: #faf8fb; }
+.student-simulated-chip { color: #6a1b9a; }
+.student-simulated-chip svg, .student-traffic { color: #6a1b9a; }
+.student-route-preview__line { background: linear-gradient(90deg, #bca1ca, #6a1b9a 51%, #cbb579); }
+.student-route-preview__stop { color: #6a1b9a; background: #f4edf8; }
+.student-route-preview__stop--assigned { border-color: #b59bc3; color: #6a1b9a; background: #f3e8ff; box-shadow: 0 0 0 5px rgba(106, 27, 154, .06); }
+.student-route-preview__bus { border-color: #c7b1d2; color: #6a1b9a; background: #f3e8ff; }
+.student-route-preview__labels, .student-route-preview__labels strong { color: #62576a; }
+.student-route-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 17px; }
+.student-route-controls label { display: grid; min-width: 0; gap: 6px; }
+.student-route-controls label > span { color: #6a1b9a; font-size: 8px; font-weight: 700; letter-spacing: .8px; }
+.student-route-controls select, .student-alert-form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #ded4e4;
+  border-radius: 8px;
+  color: #342a3b;
+  font: inherit;
+  font-size: 12px;
+  background: #fff;
+}
+.student-route-controls select:focus, .student-alert-form select:focus { border-color: #8e61a5; outline: 2px solid rgba(106, 27, 154, .12); }
+.student-route-controls option, .student-alert-form option { color: #342a3b; background: #fff; }
+.student-route-schedule { margin-top: 13px; border-top: 1px solid #eee8f1; }
+.student-route-schedule summary { display: flex; align-items: center; gap: 6px; padding: 11px 0 4px; color: #6a1b9a; font-size: 11px; font-weight: 600; cursor: pointer; list-style: none; }
+.student-route-schedule summary::-webkit-details-marker { display: none; }
+.student-route-schedule[open] summary svg { transform: rotate(90deg); }
+.student-route-schedule ol { display: grid; max-height: 230px; gap: 0; overflow-y: auto; margin: 8px 0 0; padding: 0; list-style: none; }
+.student-route-schedule li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 8px; border-top: 1px solid #f0ebf2; color: #504658; font-size: 11px; }
+.student-route-schedule li time { flex: 0 0 auto; color: #6a1b9a; font-weight: 600; }
+.student-route-schedule__selected { border-radius: 6px; background: #f6eff9; }
+
+.student-card-heading h2, .student-attendance-card__heading h2,
+.student-map-details h3, .student-empty-state h3, .student-no-trip h2 { color: #302638; }
+.student-card-heading > div > p:last-child, .student-attendance-card__heading > div > p:last-child,
+.student-map-details__registration, .student-map-details__list dt,
+.student-map-details__notice, .student-empty-state, .student-notification > div p,
+.student-notification > div time, .student-alert-form__footer > span,
+.student-trip-summary > div > span, .student-no-trip p { color: #696170; }
+.student-map { border-color: #e4dce8; background: #f1edf3; }
+.student-map__leaflet { background: #f1edf3; }
+.student-map__leaflet .leaflet-control-attribution { color: #554b5e; background: rgba(255, 255, 255, .9); }
+.student-map__leaflet .leaflet-control-attribution a { color: #6a1b9a; }
+.student-map__leaflet .leaflet-control-zoom { border-color: #d9cde0; }
+.student-map__leaflet .leaflet-control-zoom a { border-bottom-color: #e5dce9; color: #5a1582; background: #fff; }
+.student-map__leaflet .leaflet-control-zoom a:hover { color: #fff; background: #6a1b9a; }
+.student-map__leaflet .leaflet-popup-content-wrapper, .student-map__leaflet .leaflet-popup-tip { color: #342a3b; background: #fff; }
+.student-map__leaflet .leaflet-popup-close-button { color: #6a1b9a !important; }
+.student-map__attribution { color: #5e5366; background: rgba(255, 255, 255, .9); }
+.map-bus-marker__pin { border-color: #5a1582; color: #fff; background: #6a1b9a; box-shadow: 0 2px 8px rgba(51, 27, 61, .24); }
+.map-bus-marker__pin--stale { border-color: #997214; color: #fff; background: #b58a23; }
+.map-bus-marker__pin--offline { border-color: #8d5652; color: #fff; background: #a45b55; }
+.map-bus-marker__pin--selected { border-color: #fff; box-shadow: 0 0 0 4px rgba(106, 27, 154, .2), 0 3px 9px rgba(51, 27, 61, .25); }
+.student-map-details { border-color: #e8e0eb; background: #fbfafc; }
+.student-map-details__list dd { color: #3c3144; }
+.student-map-details__notice { border-top-color: #ebe5ee; }
+.student-map-legend { color: #62586a; }
+.map-legend__bus--mint { background: #6a1b9a; }
+.map-legend__bus--blue { background: #b58a23; }
+.map-legend__stop { border-color: #6a1b9a; background: #f3e8ff; }
+.student-map-legend__disclaimer { color: #756c7b; }
+.student-alert-card__icon, .notification-count { border-color: #e6d9ed; color: #6a1b9a; background: #f7f1fa; }
+.student-alert-form label > span { color: #6a1b9a; }
+.student-alert-form__footer > span { font-size: 10px; }
+.student-inline-note { color: #725912; }
+.student-inline-error { color: #944f4a; }
+.student-alert-limit { border-color: #ede5f0; color: #5d5364; background: #faf7fb; }
+.student-alert-limit > svg { color: #6a1b9a; }
+.student-in-app-alert { border-color: #d8c5e2; color: #43344d; background: #f7f1fa; }
+.student-in-app-alert > button { color: #6a1b9a; }
+.student-notification { border-top-color: #eee8f1; }
+.student-notification > div strong { color: #352a3d; }
+.student-notification__unread { background: #6a1b9a; }
+.student-trip-summary { border-color: #e7dfea; background: #fff; }
+.student-trip-summary > div > strong { color: #493e51; }
+.student-state { color: #5d5364; }
+.student-state--error { color: #914742; }
+.student-loading-dot { background: #6a1b9a; box-shadow: none; }
+.student-no-trip h2 { color: #33283b; }
+.student-attendance-card__heading, .student-attendance-table th, .student-attendance-footnote { border-color: #ebe4ee; }
+.student-attendance-table th { color: #6a1b9a; }
+.student-attendance-table td { border-bottom-color: #eee9f1; color: #403547; }
+.student-attendance-table td > strong { color: #342a3b; }
+.student-attendance-table td > small, .student-attendance-empty { color: #696170; }
+.attendance-status { border-color: #d8c5e2; color: #5a1582; background: #f6eff9; }
+.student-attendance-footnote { color: #5f5368; }
+.student-attendance-footnote svg { color: #6a1b9a; }
+.student-attendance-empty h3 { color: #342a3b; }
+
+.feature-card, .stat-card, .map-card, .activity-card, .schedule-card, .people-card { color: #342a3b; }
+.feature-card__header h2, .card-heading h2, .people-card h2, .admin-subheading,
+.student-map-details__list dd, .driver-stop strong, .driver-trip-option,
+.driver-trip-meta > span, .admin-table td, .admin-route-row__head strong,
+.admin-readiness-list strong, .admin-chart__row strong, .lora-gateway p strong,
+.lora-node__title strong, .audit-row strong { color: #342a3b; }
+.stat-card__top, .stat-card__note, .card-heading .eyebrow, .card-heading h2 + p,
+.route-status strong, .route-status small, .activity-item__body strong,
+.activity-item__body small, .activity-item__time, .schedule-details strong,
+.schedule-details small, .schedule-tag, .people-card p,
+.driver-stop small, .driver-trip-option small, .driver-vehicle-status > span,
+.driver-vehicle-status > small, .admin-table th, .admin-table td small,
+.admin-form label, .admin-toolbar label, .admin-route-row__head small,
+.admin-route-row li, .admin-audit-list strong, .admin-audit-list small,
+.admin-readiness-list p, .admin-chart__row, .lora-gateway p,
+.lora-node > small, .lora-node__metrics, .audit-row, .audit-row small,
+.student-map-details__registration { color: #696170; }
+.schedule-time, .stat-card__value { color: #3b3043; }
+.feature-card, .driver-trip-meta, .driver-trip-option, .driver-vehicle-status,
+.admin-route-row, .admin-form input, .admin-form select, .admin-form textarea,
+.admin-table select, .admin-toolbar select, .admin-stop-picker, .integration-example,
+.lora-node, .lora-gateway, .admin-audit-list p {
+  border-color: #e7dfea;
+  background-color: #fff;
+}
+.driver-trip-option--selected, .stop-picker-item--selected { border-color: #b99bc8; color: #4f2765; background: #f7f1fa; }
+.driver-stop__marker--next { border-color: #6a1b9a; color: #5a1582; background: #f3e8ff; }
+.freshness-badge--live, .audit-state--accepted { border-color: #d7c3e1; color: #5a1582; background: #f5edf9; }
+.freshness-badge--stale, .audit-state--duplicate { border-color: #ead8a5; color: #775c13; background: #fbf6e7; }
+.freshness-badge--offline, .audit-state--rejected { border-color: #e5c7c5; color: #914742; background: #fcf2f1; }
+.admin-form input, .admin-form select, .admin-form textarea, .admin-table select, .admin-toolbar select {
+  color: #342a3b;
+  background-color: #fff;
+}
+.admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus { border-color: #8e61a5; outline: 2px solid rgba(106, 27, 154, .12); }
+.admin-form option { color: #342a3b; background: #fff; }
+.admin-chart__track { background: #eee8f1; }
+.admin-chart__track i { background: linear-gradient(90deg, #6a1b9a, #ad83be); }
+.lora-node { border-color: #e0d3e8; background: #faf7fb; }
+.lora-node--offline { border-color: #e8cfcd; background: #fcf5f4; }
+.integration-example { color: #55415f; background: #fbf9fc; }
+.admin-message { border-color: #e5c7c5; color: #914742; background: #fcf2f1; }
+.admin-success { border-color: #d7c3e1; color: #5a1582; background: #f5edf9; }
+
+@media (max-width: 680px) {
+  .student-route-controls { grid-template-columns: 1fr; gap: 9px; margin-top: 13px; }
+  .student-route-controls select, .student-alert-form select { min-height: 42px; font-size: 13px; }
+  .student-route-schedule li { font-size: 10px; }
+  .student-route-schedule ol { max-height: 190px; }
+}
+
+.brand { gap: 0; }
+.sidebar__brand { display: flex; align-items: center; gap: 9px; }
+.sidebar__rec-crest { width: 25px; height: 36px; object-fit: contain; mix-blend-mode: screen; }
+.brand__mark {
+  width: 42px;
+  height: 42px;
+  border-color: #e7dfea;
+  border-radius: 13px;
+  color: #6a1b9a;
+  background: #fff;
+}
+.sidebar .brand__mark { width: 38px; height: 38px; border-color: rgba(255, 255, 255, .24); color: #fff; background: rgba(255, 255, 255, .12); }
+.topbar-note { gap: 8px; color: #65596d; font-size: 10px; }
+.breadcrumb__logo { width: 51px; height: 17px; object-fit: contain; border-radius: 2px; background: #fff; }
+.signin__institution-logo { display: block; width: min(215px, 54%); height: auto; margin: 20px 0 3px; object-fit: contain; object-position: left center; }
+@media (max-width: 680px) {
+  .signin__topbar { gap: 9px; }
+  .topbar-note { font-size: 9px; }
+  .signin__institution-logo { width: min(180px, 62%); margin: 16px 0 2px; }
+  .breadcrumb { gap: 6px; font-size: 9px; }
+  .breadcrumb__logo { width: 42px; height: 14px; }
+}

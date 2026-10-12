@@ -10,40 +10,84 @@ import type {
   Trip,
   TripAssignment,
 } from "../types/models";
+import { campusRouteTimetables } from "../data/campusRoutes";
+
+const campusStops = Array.from(
+  new Map(campusRouteTimetables.flatMap((route) =>
+    route.stops.map((stop, index) => [stop.id, {
+      id: stop.id,
+      name: stop.name,
+      shortName: stop.name,
+      latitude: stop.latitude,
+      longitude: stop.longitude,
+      sequence: index + 1,
+    }] as const),
+  )).values(),
+);
 
 export const demoSnapshot: FleetSnapshot = {
-  routes: [
-    {
-      id: "route-north",
-      name: "North loop",
-      code: "N-01",
-      stopIds: ["stop-library", "stop-residences", "stop-gate"],
-      estimatedDurationMinutes: 28,
-      status: "active",
-    },
-    {
-      id: "route-garden",
-      name: "Garden district",
-      code: "G-02",
-      stopIds: ["stop-garden", "stop-library", "stop-gate"],
-      estimatedDurationMinutes: 34,
-      status: "active",
-    },
-  ],
+  routes: campusRouteTimetables.map((route) => ({
+    id: route.id,
+    name: route.name,
+    code: route.code,
+    stopIds: route.stops.map((stop) => stop.id),
+    estimatedDurationMinutes: Math.max(
+      1,
+      Math.round(
+        route.stops[route.stops.length - 1].time.split(":").reduce((total, part, index) =>
+          index === 0 ? Number(part) * 60 : total + Number(part), 0) -
+        route.stops[0].time.split(":").reduce((total, part, index) =>
+          index === 0 ? Number(part) * 60 : total + Number(part), 0),
+      ),
+    ),
+    status: "active",
+  })),
   trips: [
     {
       id: "trip-morning-01",
       routeId: "route-north",
-      scheduledStart: "08:15",
-      scheduledEnd: "08:43",
+      scheduledStart: "06:25",
+      scheduledEnd: "08:10",
       status: "in_progress",
       direction: "outbound",
     },
     {
       id: "trip-morning-02",
       routeId: "route-garden",
-      scheduledStart: "09:00",
-      scheduledEnd: "09:34",
+      scheduledStart: "06:05",
+      scheduledEnd: "08:10",
+      status: "scheduled",
+      direction: "outbound",
+    },
+    {
+      id: "trip-morning-03",
+      routeId: "route-ambattur-estate",
+      scheduledStart: "06:35",
+      scheduledEnd: "08:10",
+      status: "scheduled",
+      direction: "outbound",
+    },
+    {
+      id: "trip-morning-04",
+      routeId: "route-redhills",
+      scheduledStart: "06:05",
+      scheduledEnd: "08:10",
+      status: "scheduled",
+      direction: "outbound",
+    },
+    {
+      id: "trip-morning-05",
+      routeId: "route-iyyappanthangal",
+      scheduledStart: "06:40",
+      scheduledEnd: "08:10",
+      status: "scheduled",
+      direction: "outbound",
+    },
+    {
+      id: "trip-morning-06",
+      routeId: "route-guduvanchery",
+      scheduledStart: "06:40",
+      scheduledEnd: "08:10",
       status: "scheduled",
       direction: "outbound",
     },
@@ -58,8 +102,48 @@ export const demoSnapshot: FleetSnapshot = {
     {
       id: "trip-homebound-01",
       routeId: "route-north",
-      scheduledStart: "17:15",
-      scheduledEnd: "17:49",
+      scheduledStart: "16:00",
+      scheduledEnd: "17:45",
+      status: "scheduled",
+      direction: "homebound",
+    },
+    {
+      id: "trip-homebound-02",
+      routeId: "route-garden",
+      scheduledStart: "16:00",
+      scheduledEnd: "18:05",
+      status: "scheduled",
+      direction: "homebound",
+    },
+    {
+      id: "trip-homebound-03",
+      routeId: "route-ambattur-estate",
+      scheduledStart: "16:00",
+      scheduledEnd: "17:35",
+      status: "scheduled",
+      direction: "homebound",
+    },
+    {
+      id: "trip-homebound-04",
+      routeId: "route-redhills",
+      scheduledStart: "16:00",
+      scheduledEnd: "18:05",
+      status: "scheduled",
+      direction: "homebound",
+    },
+    {
+      id: "trip-homebound-05",
+      routeId: "route-iyyappanthangal",
+      scheduledStart: "16:00",
+      scheduledEnd: "17:30",
+      status: "scheduled",
+      direction: "homebound",
+    },
+    {
+      id: "trip-homebound-06",
+      routeId: "route-guduvanchery",
+      scheduledStart: "16:00",
+      scheduledEnd: "17:30",
       status: "scheduled",
       direction: "homebound",
     },
@@ -89,12 +173,23 @@ export const demoSnapshot: FleetSnapshot = {
       status: "active",
     },
     {
+      id: "bus-spare",
+      registration: "DEMO-707",
+      label: "Reserve",
+      capacity: 40,
+      status: "active",
+    },
+    {
       id: "bus-cedar",
       registration: "DEMO-308",
       label: "Cedar",
       capacity: 40,
       status: "maintenance",
     },
+    { id: "bus-route-3", registration: "DEMO-303", label: "Route 3", capacity: 40, status: "active" },
+    { id: "bus-route-4", registration: "DEMO-404", label: "Route 4", capacity: 40, status: "active" },
+    { id: "bus-route-5", registration: "DEMO-505", label: "Route 5", capacity: 40, status: "active" },
+    { id: "bus-route-6", registration: "DEMO-606", label: "Route 6", capacity: 40, status: "active" },
   ],
   trackers: [
     {
@@ -125,6 +220,10 @@ export const demoSnapshot: FleetSnapshot = {
       status: "inactive",
       lastSeenAt: "2026-10-05T07:06:00+05:30",
     },
+    { id: "tracker-route-3", serialNumber: "DEMO-GPS-303", busId: "bus-route-3", status: "active", lastSeenAt: "2026-10-06T08:30:00+05:30" },
+    { id: "tracker-route-4", serialNumber: "DEMO-GPS-404", busId: "bus-route-4", status: "active", lastSeenAt: "2026-10-06T08:30:00+05:30" },
+    { id: "tracker-route-5", serialNumber: "DEMO-GPS-505", busId: "bus-route-5", status: "active", lastSeenAt: "2026-10-06T08:30:00+05:30" },
+    { id: "tracker-route-6", serialNumber: "DEMO-GPS-606", busId: "bus-route-6", status: "active", lastSeenAt: "2026-10-06T08:30:00+05:30" },
   ],
   drivers: [
     {
@@ -141,6 +240,11 @@ export const demoSnapshot: FleetSnapshot = {
       phone: "+91 90000 10002",
       status: "active",
     },
+    { id: "driver-spare", name: "Reserve Driver", email: "reserve@example.test", phone: "+91 90000 10007", status: "active" },
+    { id: "driver-route-3", name: "Demo Driver 3", email: "driver3@example.test", phone: "+91 90000 10003", status: "active" },
+    { id: "driver-route-4", name: "Demo Driver 4", email: "driver4@example.test", phone: "+91 90000 10004", status: "active" },
+    { id: "driver-route-5", name: "Demo Driver 5", email: "driver5@example.test", phone: "+91 90000 10005", status: "active" },
+    { id: "driver-route-6", name: "Demo Driver 6", email: "driver6@example.test", phone: "+91 90000 10006", status: "active" },
   ],
   students: [
     {
@@ -148,57 +252,24 @@ export const demoSnapshot: FleetSnapshot = {
       name: "Anaya Rao",
       email: "anaya.rao@example.test",
       studentNumber: "DEMO-24018",
-      stopId: "stop-residences",
+      stopId: "stop-r1-thiruvottiyur",
     },
     {
       id: "student-isha",
       name: "Isha Menon",
       email: "isha.menon@example.test",
       studentNumber: "DEMO-24106",
-      stopId: "stop-garden",
+      stopId: "stop-r2-singapore-shopping",
     },
     {
       id: "student-kabir",
       name: "Kabir Shah",
       email: "kabir.shah@example.test",
       studentNumber: "DEMO-24231",
-      stopId: "stop-library",
+      stopId: "stop-r1-central-railway",
     },
   ],
-  stops: [
-    {
-      id: "stop-library",
-      name: "Founders Library",
-      shortName: "Library",
-      latitude: 12.9719,
-      longitude: 77.5948,
-      sequence: 1,
-    },
-    {
-      id: "stop-residences",
-      name: "North Residences",
-      shortName: "Residences",
-      latitude: 12.9762,
-      longitude: 77.6014,
-      sequence: 2,
-    },
-    {
-      id: "stop-garden",
-      name: "Garden Quarter",
-      shortName: "Garden",
-      latitude: 12.9681,
-      longitude: 77.6071,
-      sequence: 1,
-    },
-    {
-      id: "stop-gate",
-      name: "East Campus Gate",
-      shortName: "East gate",
-      latitude: 12.9648,
-      longitude: 77.5972,
-      sequence: 3,
-    },
-  ],
+  stops: campusStops,
   rfidCards: [
     {
       id: "card-anaya",
@@ -219,10 +290,10 @@ export const demoSnapshot: FleetSnapshot = {
       studentId: "student-anaya",
       tripId: "trip-morning-01",
       cardId: "card-anaya",
-      stopId: "stop-residences",
+      stopId: "stop-r1-thiruvottiyur",
       eventType: "boarded",
       occurredAt: "2026-10-06T08:21:00+05:30",
-      readerId: "reader-residences",
+      readerId: "reader-library",
       source: "simulated",
       eventStatus: "recorded",
     },
@@ -231,7 +302,7 @@ export const demoSnapshot: FleetSnapshot = {
       studentId: "student-isha",
       tripId: "trip-morning-02",
       cardId: "card-isha",
-      stopId: "stop-garden",
+      stopId: "stop-r2-singapore-shopping",
       eventType: "boarded",
       occurredAt: "2026-10-06T08:27:00+05:30",
       readerId: "reader-garden",
@@ -243,24 +314,24 @@ export const demoSnapshot: FleetSnapshot = {
     {
       id: "gps-aurora-now",
       trackerId: "tracker-17",
-      latitude: 12.9738,
-      longitude: 77.5984,
+      latitude: 13.0827,
+      longitude: 80.2757,
       speedKph: 24,
       recordedAt: "2026-10-06T08:31:00+05:30",
     },
     {
       id: "gps-cascade-now",
       trackerId: "tracker-22",
-      latitude: 12.9702,
-      longitude: 77.6031,
+      latitude: 13.1147,
+      longitude: 80.1018,
       speedKph: 18,
       recordedAt: "2026-10-06T08:29:00+05:30",
     },
     {
       id: "gps-cedar-last-seen",
       trackerId: "tracker-cedar",
-      latitude: 12.9693,
-      longitude: 77.6038,
+      latitude: 12.9730868,
+      longitude: 80.2430635,
       speedKph: 0,
       recordedAt: "2026-10-05T07:06:00+05:30",
     },
@@ -269,11 +340,11 @@ export const demoSnapshot: FleetSnapshot = {
     {
       id: "lora-reader-library",
       name: "Library reader",
-      stopId: "stop-library",
+      stopId: "stop-campus",
       status: "active",
       lastSeenAt: "2026-10-06T08:30:00+05:30",
       parentNodeId: "lora-relay-north",
-      gatewayId: "gateway-northstar",
+      gatewayId: "gateway-rec-south",
       batteryPercent: 87,
       rssiDbm: -61,
       snrDb: 9.4,
@@ -283,11 +354,11 @@ export const demoSnapshot: FleetSnapshot = {
     {
       id: "lora-relay-north",
       name: "North relay",
-      stopId: "stop-residences",
+      stopId: "stop-r1-thiruvottiyur",
       status: "active",
       lastSeenAt: "2026-10-06T08:30:00+05:30",
       parentNodeId: "lora-relay-east",
-      gatewayId: "gateway-northstar",
+      gatewayId: "gateway-rec-south",
       batteryPercent: 74,
       rssiDbm: -72,
       snrDb: 6.2,
@@ -296,11 +367,11 @@ export const demoSnapshot: FleetSnapshot = {
     {
       id: "lora-relay-east",
       name: "East relay",
-      stopId: "stop-garden",
+      stopId: "stop-r2-singapore-shopping",
       status: "active",
       lastSeenAt: "2026-10-06T08:30:00+05:30",
       parentNodeId: null,
-      gatewayId: "gateway-northstar",
+      gatewayId: "gateway-rec-south",
       batteryPercent: 92,
       rssiDbm: -66,
       snrDb: 8.1,
@@ -309,11 +380,11 @@ export const demoSnapshot: FleetSnapshot = {
     {
       id: "lora-reader-garden",
       name: "Garden reader",
-      stopId: "stop-garden",
+      stopId: "stop-r2-singapore-shopping",
       status: "active",
       lastSeenAt: "2026-10-06T08:30:00+05:30",
       parentNodeId: "lora-relay-east",
-      gatewayId: "gateway-northstar",
+      gatewayId: "gateway-rec-south",
       batteryPercent: 63,
       rssiDbm: -78,
       snrDb: 4.6,
@@ -323,8 +394,8 @@ export const demoSnapshot: FleetSnapshot = {
   ],
   loraGateways: [
     {
-      id: "gateway-northstar",
-      name: "Northstar campus gateway",
+      id: "gateway-rec-south",
+      name: "Rajalakshmi campus gateway (demo)",
       status: "active",
       lastSeenAt: "2026-10-06T08:30:00+05:30",
       backendConnected: true,
@@ -335,7 +406,7 @@ export const demoSnapshot: FleetSnapshot = {
       id: "notice-arrival",
       recipientId: "student-anaya",
       title: "Your bus is nearby",
-      message: "Aurora is a few minutes from North Residences.",
+      message: "Your Route 1 bus is approaching its next scheduled stop.",
       createdAt: "2026-10-06T08:29:00+05:30",
       read: false,
     },
@@ -343,7 +414,7 @@ export const demoSnapshot: FleetSnapshot = {
       id: "notice-route",
       recipientId: "student-isha",
       title: "A calm start to your day",
-      message: "Garden Quarter pickup is running to schedule.",
+      message: "Route 2 timings are available in your commute plan.",
       createdAt: "2026-10-06T08:25:00+05:30",
       read: true,
     },
@@ -382,6 +453,78 @@ export const demoSnapshot: FleetSnapshot = {
       assignedAt: "2026-10-06T07:45:00+05:30",
     },
     {
+      id: "assignment-morning-03",
+      tripId: "trip-morning-03",
+      busId: "bus-route-3",
+      trackerId: "tracker-route-3",
+      driverId: "driver-route-3",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-morning-04",
+      tripId: "trip-morning-04",
+      busId: "bus-route-4",
+      trackerId: "tracker-route-4",
+      driverId: "driver-route-4",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-morning-05",
+      tripId: "trip-morning-05",
+      busId: "bus-route-5",
+      trackerId: "tracker-route-5",
+      driverId: "driver-route-5",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-morning-06",
+      tripId: "trip-morning-06",
+      busId: "bus-route-6",
+      trackerId: "tracker-route-6",
+      driverId: "driver-route-6",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-homebound-02",
+      tripId: "trip-homebound-02",
+      busId: "bus-cascade",
+      trackerId: "tracker-22",
+      driverId: "driver-rohan",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-homebound-03",
+      tripId: "trip-homebound-03",
+      busId: "bus-route-3",
+      trackerId: "tracker-route-3",
+      driverId: "driver-route-3",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-homebound-04",
+      tripId: "trip-homebound-04",
+      busId: "bus-route-4",
+      trackerId: "tracker-route-4",
+      driverId: "driver-route-4",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-homebound-05",
+      tripId: "trip-homebound-05",
+      busId: "bus-route-5",
+      trackerId: "tracker-route-5",
+      driverId: "driver-route-5",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
+      id: "assignment-homebound-06",
+      tripId: "trip-homebound-06",
+      busId: "bus-route-6",
+      trackerId: "tracker-route-6",
+      driverId: "driver-route-6",
+      assignedAt: "2026-10-06T07:45:00+05:30",
+    },
+    {
       id: "assignment-cedar-01",
       tripId: "trip-cedar-maintenance-01",
       busId: "bus-cedar",
@@ -396,14 +539,6 @@ export const demoSnapshot: FleetSnapshot = {
 };
 
 const clone = <T,>(value: T): T => structuredClone(value);
-
-function scheduledTime(date: Date): string {
-  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-function addMinutes(date: Date, minutes: number): Date {
-  return new Date(date.getTime() + minutes * 60_000);
-}
 
 const snapshotStorageKey = "wayfinder.demo-fleet.v1";
 const snapshotUpdatedEvent = "wayfinder:demo-fleet-updated";
@@ -452,22 +587,77 @@ function normalizeSnapshot(value: unknown): FleetSnapshot | null {
   ] as const;
   if (!coreKeys.every((key) => Array.isArray(candidate[key]))) return null;
 
-  const routes = mergeRecords(candidate.routes, demoSnapshot.routes);
+  const legacyRouteNames: Record<string, string> = {
+    "route-north": "North loop",
+    "route-garden": "Garden district",
+  };
+  const routeInput = (candidate.routes as { id: string; name?: string }[]).map((route) => {
+    const legacyName = legacyRouteNames[route.id];
+    const seededRoute = demoSnapshot.routes.find((item) => item.id === route.id);
+    return legacyName && route.name === legacyName && seededRoute
+      ? { ...route, ...seededRoute }
+      : route;
+  });
+  const routes = mergeRecords(routeInput, demoSnapshot.routes);
   const trips = mergeRecords(candidate.trips, demoSnapshot.trips);
   const buses = mergeRecords(candidate.buses, demoSnapshot.buses);
   const trackers = mergeRecords(candidate.trackers, demoSnapshot.trackers);
   const drivers = mergeRecords(candidate.drivers, demoSnapshot.drivers);
-  const students = mergeRecords(candidate.students, demoSnapshot.students);
-  const stops = mergeRecords(candidate.stops, demoSnapshot.stops);
+  const legacyStopIds: Record<string, string> = {
+    "stop-library": "stop-r1-central-railway",
+    "stop-residences": "stop-r1-thiruvottiyur",
+    "stop-garden": "stop-r2-singapore-shopping",
+    "stop-gate": "stop-campus",
+  };
+  const oldDemoStopNames = new Set(["Founders Library", "North Residences", "Garden Quarter", "East Campus Gate"]);
+  const studentsInput = (candidate.students as { id: string; stopId?: string }[]).map((student) => ({
+    ...student,
+    stopId: student.stopId && legacyStopIds[student.stopId] ? legacyStopIds[student.stopId] : student.stopId,
+  }));
+  const students = mergeRecords(studentsInput, demoSnapshot.students);
+  const stopsInput = (candidate.stops as { id: string; name?: string; latitude?: number; longitude?: number }[])
+    .filter((stop) => !oldDemoStopNames.has(stop.name ?? ""))
+    .map((stop) => {
+      const campus = demoSnapshot.stops.find((item) => item.id === "stop-campus");
+      const isOldCampusSeed = stop.id === "stop-campus" &&
+        stop.latitude === 13.0202 && stop.longitude === 79.9828;
+      return isOldCampusSeed && campus ? { ...stop, ...campus } : stop;
+    });
+  const stops = mergeRecords(stopsInput, demoSnapshot.stops);
   const rfidCards = mergeRecords(candidate.rfidCards, demoSnapshot.rfidCards);
-  const attendanceEvents = mergeRecords(candidate.attendanceEvents, demoSnapshot.attendanceEvents);
-  const gpsTelemetry = mergeRecords(candidate.gpsTelemetry, demoSnapshot.gpsTelemetry);
+  const attendanceInput = (candidate.attendanceEvents as { id: string; stopId?: string }[]).map((event) => ({
+    ...event,
+    stopId: event.stopId && legacyStopIds[event.stopId] ? legacyStopIds[event.stopId] : event.stopId,
+  }));
+  const attendanceEvents = mergeRecords(attendanceInput, demoSnapshot.attendanceEvents);
+  const legacyGpsSeeds = new Map(demoSnapshot.gpsTelemetry.map((item) => [item.id, item]));
+  const gpsInput = (candidate.gpsTelemetry as FleetSnapshot["gpsTelemetry"]).map((telemetry) => {
+    const seeded = legacyGpsSeeds.get(telemetry.id);
+    return seeded && telemetry.longitude < 78
+      ? { ...telemetry, latitude: seeded.latitude, longitude: seeded.longitude }
+      : telemetry;
+  });
+  const gpsTelemetry = mergeRecords(gpsInput, demoSnapshot.gpsTelemetry);
   const notifications = mergeRecords(candidate.notifications, demoSnapshot.notifications);
   const tripAssignments = mergeRecords(candidate.tripAssignments, demoSnapshot.tripAssignments);
   const ingestionAudit = mergeRecords(candidate.ingestionAudit, []);
   const driverIncidents = mergeRecords(candidate.driverIncidents, []);
   const tripLifecycleEvents = mergeRecords(candidate.tripLifecycleEvents, []);
-  const gatewayDefaults = mergeRecords(candidate.loraGateways, demoSnapshot.loraGateways);
+  const legacyGatewayIds: Record<string, string> = {
+    "gateway-northstar": "gateway-rec-south",
+  };
+  const gatewayInput = Array.isArray(candidate.loraGateways)
+    ? (candidate.loraGateways as { id: string; name?: string }[]).map((gateway) => {
+    const id = legacyGatewayIds[gateway.id] ?? gateway.id;
+    const seeded = demoSnapshot.loraGateways.find((item) => item.id === id);
+    return {
+      ...gateway,
+      id,
+      ...(seeded && gateway.name?.toLowerCase().includes("northstar") ? { name: seeded.name } : {}),
+    };
+    })
+    : candidate.loraGateways;
+  const gatewayDefaults = mergeRecords(gatewayInput, demoSnapshot.loraGateways);
   const rawNodes = Array.isArray(candidate.loraNodes) ? candidate.loraNodes.map((node) => {
     if (!node || typeof node !== "object" || typeof node.id !== "string") return node;
     const legacyId = node.id === "lora-library" ? "lora-reader-library" : node.id === "lora-garden" ? "lora-reader-garden" : node.id;
@@ -476,8 +666,11 @@ function normalizeSnapshot(value: unknown): FleetSnapshot | null {
       ...seeded,
       ...node,
       id: legacyId,
+      stopId: legacyStopIds[node.stopId] ?? (node.id === "lora-library" ? "stop-campus" : node.id === "lora-garden" ? "stop-r2-singapore-shopping" : node.stopId),
       parentNodeId: node.parentNodeId ?? seeded?.parentNodeId ?? null,
-      gatewayId: node.gatewayId ?? seeded?.gatewayId ?? demoSnapshot.loraGateways[0]?.id,
+      gatewayId: typeof node.gatewayId === "string"
+        ? legacyGatewayIds[node.gatewayId] ?? node.gatewayId
+        : seeded?.gatewayId ?? demoSnapshot.loraGateways[0]?.id,
       batteryPercent: node.batteryPercent ?? seeded?.batteryPercent,
       rssiDbm: node.rssiDbm ?? seeded?.rssiDbm,
       snrDb: node.snrDb ?? seeded?.snrDb,
@@ -493,7 +686,15 @@ function normalizeSnapshot(value: unknown): FleetSnapshot | null {
   }
   const tripRecords = trips.map((trip) => {
     const seeded = demoSnapshot.trips.find((item) => item.id === trip.id);
-    return { ...trip, direction: trip.direction ?? seeded?.direction };
+    return seeded
+      ? {
+          ...trip,
+          scheduledStart: seeded.scheduledStart,
+          scheduledEnd: seeded.scheduledEnd,
+          scheduledDate: seeded.scheduledDate,
+          direction: trip.direction ?? seeded.direction,
+        }
+      : trip;
   });
 
   return {
@@ -623,26 +824,6 @@ export class DemoFleetService implements FleetService {
 
   private applyDemoClock(snapshot: FleetSnapshot): void {
     const now = new Date();
-    for (const [tripId, startOffset, duration] of [
-      ["trip-morning-02", 38, 34],
-      ["trip-next-01", 18, 28],
-      ["trip-homebound-01", 90, 34],
-    ] as const) {
-      const trip = snapshot.trips.find((item) => item.id === tripId);
-      if (trip && trip.status === "scheduled") {
-        const departure = addMinutes(now, startOffset);
-        trip.scheduledDate = localDateKey(departure);
-        trip.scheduledStart = scheduledTime(departure);
-        trip.scheduledEnd = scheduledTime(addMinutes(departure, duration));
-      }
-    }
-    const activeTrip = snapshot.trips.find((trip) => trip.id === "trip-morning-01");
-    if (activeTrip?.status === "in_progress") {
-      const departure = addMinutes(now, -15);
-      activeTrip.scheduledDate = localDateKey(departure);
-      activeTrip.scheduledStart = scheduledTime(departure);
-      activeTrip.scheduledEnd = scheduledTime(addMinutes(now, 13));
-    }
     for (const tracker of snapshot.trackers) {
       const hasDeviceTelemetry = snapshot.ingestionAudit.some(
         (event) => event.status === "accepted" && event.eventType === "gps.telemetry.v1" &&
