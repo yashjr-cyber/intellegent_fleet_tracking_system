@@ -1,6 +1,6 @@
 # Wayfinder Mobility
 
-Milestone 1 foundation for **Dynamic Institutional Mobility Intelligence**: a responsive, role-separated campus mobility experience built with React, TypeScript, and Vite.
+**Dynamic Institutional Mobility Intelligence** is a responsive, role-separated campus mobility MVP built with React, TypeScript, and Vite. Its student, driver, and campus-team workflows use explicitly fictional demo data.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ The first deployment requires GitHub Pages to be enabled with **Build and deploy
 ## Foundation
 
 - `src/types/models.ts` defines the typed domain records and `FleetSnapshot`.
-- `src/services/FleetService.ts` is the async service contract; `demoFleetService.ts` provides isolated fictional sample data for the first milestone.
+- `src/services/FleetService.ts` is the async service contract; `demoFleetService.ts` provides isolated fictional sample data and mock integration boundaries.
 - `src/auth/AuthContext.tsx` and `src/App.tsx` provide demo role selection and separate `/student`, `/driver`, and `/admin` shells.
 - `src/components/` contains shared branding, icons, and responsive dashboard navigation.
 - Student pages provide a simulated campus map, replaceable ETA service, notification preferences and a read-only RFID attendance view.
