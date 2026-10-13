@@ -1,5 +1,7 @@
 import { useEffect, useMemo } from "react";
 import L from "leaflet";
+import { setWorkerUrl } from "maplibre-gl";
+import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
   CircleMarker,
   MapContainer,
@@ -9,9 +11,13 @@ import {
   useMap,
 } from "react-leaflet";
 import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
+import "leaflet/dist/leaflet.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import type { ArrivalPrediction } from "../services/ArrivalPredictionService";
 import type { SimulatedBusPosition } from "../services/simulatedTrackingService";
 import type { Route, Stop, Trip } from "../types/models";
+
+setWorkerUrl(mapLibreWorkerUrl);
 
 interface BusMapDetails {
   busLabel: string;
