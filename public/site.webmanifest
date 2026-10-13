@@ -1,0 +1,18 @@
+{
+  "name": "Wayfinder Mobility",
+  "short_name": "Wayfinder",
+  "description": "A campus mobility prototype with fictional sample data and simulated vehicle locations.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#14252c",
+  "theme_color": "#14252c",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
