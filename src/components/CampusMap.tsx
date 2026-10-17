@@ -1,17 +1,23 @@
 import { useEffect, useMemo } from "react";
 import L from "leaflet";
+import { setWorkerUrl } from "maplibre-gl";
+import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
   CircleMarker,
   MapContainer,
   Marker,
   Polyline,
   Popup,
-  TileLayer,
   useMap,
 } from "react-leaflet";
+import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
+import "leaflet/dist/leaflet.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import type { ArrivalPrediction } from "../services/ArrivalPredictionService";
 import type { SimulatedBusPosition } from "../services/simulatedTrackingService";
 import type { Route, Stop, Trip } from "../types/models";
+
+setWorkerUrl(mapLibreWorkerUrl);
 
 interface BusMapDetails {
   busLabel: string;
@@ -70,6 +76,22 @@ function MapSizeObserver() {
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => map.invalidateSize());
     return () => window.cancelAnimationFrame(frame);
+  }, [map]);
+
+  return null;
+}
+
+function VectorTileLayer() {
+  const map = useMap();
+
+  useEffect(() => {
+    const layer = maplibreGL({
+      style: "https://tiles.openfreemap.org/styles/liberty",
+    }).addTo(map);
+
+    return () => {
+      layer.remove();
+    };
   }, [map]);
 
   return null;
@@ -134,10 +156,7 @@ export function CampusMap({
     >
       <MapSizeObserver />
       <RouteBoundsFitter bounds={mapBounds} />
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <VectorTileLayer />
       {routes.map((route) => {
         const routeStops = route.stopIds.flatMap((stopId) => {
           const stop = stopsById.get(stopId);

@@ -23,7 +23,7 @@ The repository includes a GitHub Actions workflow that builds, tests, and deploy
 
 `https://yashjr-cyber.github.io/intellegent_fleet_tracking_system/`
 
-Direct role URLs are restored through the Pages 404 fallback. The hosted site remains a public demo: its role picker is not authentication, each browser has its own local demo data, and no backend, real GPS/GNSS, or LoRa API is connected. Do not enter personal or sensitive data. This static deployment is suitable for a small judging/demo audience (around 100 viewers) because the site files are CDN-served; map tiles still depend on the public OpenStreetMap tile service and its usage policy. For shared live fleet data, real users, or device ingestion, add a separately secured backend and database before scaling those capabilities.
+Direct role URLs are restored through the Pages 404 fallback. The hosted site remains a public demo: its role picker is not authentication, each browser has its own local demo data, and no backend, real GPS/GNSS, or LoRa API is connected. Do not enter personal or sensitive data. The student map uses GPU-rendered OpenFreeMap vector tiles, based on OpenStreetMap data, and requires no API key; the public tile service has no SLA. Route coordinates remain illustrative and should be verified before operational use. For shared live fleet data, real users, or device ingestion, add a separately secured backend and database before scaling those capabilities.
 
 The first deployment requires GitHub Pages to be enabled with **Build and deployment: GitHub Actions** in repository settings. Deployment status is available in the Actions tab.
 
@@ -41,7 +41,7 @@ Routes, trips, buses, and trackers are separate records. A trip references a rou
 
 ## Demo-only notice
 
-Names, locations, schedules, identifiers, telemetry, and attendance are fictional sample data. The student map uses OpenStreetMap tiles with simulated vehicle locations; ETAs are illustrative prototype estimates, not validated machine-learning predictions. Browser arrival alerts require notification permission and this page to remain open; they are not background push notifications. Demo role selection is **not authentication or authorization** and provides no production security. Backend, identity-provider, real GPS, and hardware integrations are not included.
+Names, locations, schedules, identifiers, telemetry, and attendance are fictional sample data. The student map uses OpenFreeMap vector tiles with simulated vehicle locations; its OpenStreetMap-derived data and illustrative route coordinates are not guaranteed to match Google Maps or ground truth. ETAs are illustrative prototype estimates, not validated machine-learning predictions. Browser arrival alerts require notification permission and this page to remain open; they are not background push notifications. Demo role selection is **not authentication or authorization** and provides no production security. Backend, identity-provider, real GPS, and hardware integrations are not included.
 
 ## Integration boundary (prototype only)
 

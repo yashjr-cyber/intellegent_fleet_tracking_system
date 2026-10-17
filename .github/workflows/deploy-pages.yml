@@ -32,7 +32,7 @@ jobs:
       - name: Run tests
         run: npm test
       - name: Build static site
-        run: npm run build -- --base=/intellegent_fleet_tracking_system/
+        run: npm run build:pages
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

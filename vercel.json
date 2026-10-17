@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/demo", "destination": "/app.html" },
+    { "source": "/student", "destination": "/app.html" },
+    { "source": "/student/:path*", "destination": "/app.html" },
+    { "source": "/parent", "destination": "/app.html" },
+    { "source": "/parent/:path*", "destination": "/app.html" },
+    { "source": "/driver", "destination": "/app.html" },
+    { "source": "/driver/:path*", "destination": "/app.html" },
+    { "source": "/admin", "destination": "/app.html" },
+    { "source": "/admin/:path*", "destination": "/app.html" }
+  ]
+}
